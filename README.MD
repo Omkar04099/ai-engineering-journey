@@ -1,21 +1,24 @@
 # AI Engineering Journey
 
-My hands-on learning journey from React development toward AI engineering.
+My journey from React development toward AI engineering through
+structured learning, hands-on projects, and continuous practice.
 
-## Week 1: Python Fundamentals
+## Roadmap
+
+- [x] Python fundamentals: Days 1–2
+- [ ] Python data structures and testing
+- [ ] FastAPI and REST APIs
+- [ ] LLM fundamentals and API integration
+- [ ] Embeddings, vector search, and RAG
+- [ ] AI agents and workflow orchestration
+- [ ] Production deployment and evaluation
+
+## Projects
 
 ### Expense Analyzer
+A Python project for filtering expenses, calculating category totals,
+and generating category summaries.
 
-A beginner-friendly Python program that demonstrates:
+## Learning Notes
 
-- Lists and dictionaries
-- Loops and conditional statements
-- Functions and data aggregation
-- Filtering expenses
-- Calculating totals and averages
-
-## Learning approach
-
-I learn each concept through structured lessons, hands-on coding, experimentation, and testing.
-
-More projects and learnings will be added as I progress.
+See [Week 1 Python Notes](week-01-python/notes.md).
