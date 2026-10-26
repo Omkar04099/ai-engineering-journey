@@ -10,6 +10,14 @@ expenses = [
     {"category": "utilities", "amount": 300},
 ]
 
+orders = [
+    {"product": "laptop", "quantity": 1},
+    {"product": "mouse", "quantity": 2},
+    {"product": "laptop", "quantity": 3},
+    {"product": "keyboard", "quantity": 1},
+    {"product": "mouse", "quantity": 4}
+]
+
 # Day 1
 
 def calculate_total(expenses):
@@ -81,14 +89,64 @@ def summarize_category(expenses, category):
       result["average"] = result["total"] / result["count"]
   return result
 
+
+# Day 3
+
+def count_fruits(fruits):
+  fruit_count = {}
+  for fruit in fruits:
+    if fruit in fruit_count:
+      fruit_count[fruit] += 1
+    else:
+      fruit_count[fruit] = 1
+  return fruit_count
+
+def group_expenses_by_category(expenses):
+  grouped_expenses = {}
+  for expense in expenses:
+    if expense["category"] in grouped_expenses:
+      grouped_expenses[expense["category"]].append(expense.copy())
+    else:
+      grouped_expenses[expense["category"]] = [expense.copy()]
+  return grouped_expenses
+
+def summarize_expenses_by_category(expenses):
+  summary = {}
+  for expense in expenses:
+    if expense["category"] in summary:
+      summary[expense["category"]]["total"] += expense["amount"]
+      summary[expense["category"]]["count"] += 1
+    else:
+      summary[expense["category"]] = {"total":expense["amount"], "count":1}
+  return summary
+
+def summarize_orders(orders):
+  summary = {}
+  for order in orders:
+    if order["product"] in summary:
+      summary[order["product"]] += order["quantity"]
+    else:
+      summary[order["product"]] = order["quantity"]
+  return summary
+ 
+# 1
 total = calculate_total(expenses)
 category_wise_total = total_by_category(expenses)
 minimum_expenses = filter_expenses(expenses,100)
 average_amount = average_expense(expenses)
 highest_exp = highest_expense(expenses)
+
+# 2
 filtered_exp = filter_by_category(expenses,"food")
 category_total = calculate_category_total(expenses, "food")
 summary = summarize_category(expenses, "food")
+
+# 3
+fruit_wise_count = count_fruits(fruits)
+grouped_expenses = group_expenses_by_category(expenses)
+summarized_expenses = summarize_expenses_by_category(expenses)
+summarized_orders = summarize_orders(orders)
+
 print(total)
 print(category_wise_total)
 print(minimum_expenses)
@@ -97,3 +155,8 @@ print(highest_exp)
 print("summary :",summary)
 print("category total :",category_total)
 print("filtered expenses :",filtered_exp)
+
+print(fruit_wise_count)
+print(grouped_expenses)
+print(summarized_expenses)
+print(summarized_orders)
