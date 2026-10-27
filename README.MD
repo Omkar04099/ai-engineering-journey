@@ -1,55 +1,59 @@
 # AI Engineering Journey
 
-My journey from React development toward AI engineering through structured learning, hands-on projects, and continuous practice.
+My journey from React development toward AI engineering through
+structured learning, hands-on projects, and continuous practice.
 
-My focus is on building strong programming fundamentals, understanding concepts deeply, and gradually applying them to real-world AI applications.
+I'm focusing on strong programming fundamentals, deep understanding, and
+practical skills for building real-world AI applications.
 
 ## Roadmap
 
-- [x] Python fundamentals: Days 1–2
-- [x] Python dictionaries, data processing, and copying: Day 3
-- [ ] Automated testing with `assert` and `unittest`
-- [ ] FastAPI and REST APIs
-- [ ] Databases and backend integration
-- [ ] LLM fundamentals and API integration
-- [ ] Embeddings, vector search, and Retrieval-Augmented Generation (RAG)
-- [ ] AI agents and workflow orchestration
-- [ ] Production deployment, evaluation, and interview preparation
+-   [x] Python fundamentals: Days 1--2
+-   [x] Dictionaries, data processing, and copying: Day 3
+-   [x] Automated testing with `assert` and `unittest`: Day 4
+-   [ ] Error handling and defensive programming: Day 5
+-   [ ] FastAPI and REST APIs
+-   [ ] Databases and backend integration
+-   [ ] LLM fundamentals and API integration
+-   [ ] Embeddings, vector search, and Retrieval-Augmented Generation
+    (RAG)
+-   [ ] AI agents and workflow orchestration
+-   [ ] Production deployment, evaluation, and interview preparation
 
 ## Projects
 
 ### Expense Analyzer
 
-A Python project for processing expense records and practicing core programming concepts.
+A Python project for practicing core programming concepts by processing
+expense and order records.
 
-**Features and concepts practiced:**
-- Filtering expenses by category
-- Calculating category-wise totals and counts
-- Generating category summaries
-- Counting occurrences using dictionaries
-- Grouping records by category
-- Aggregating product quantities
-- Handling empty inputs and edge cases
-- Understanding references, shallow copies, and deep copies
+**Features and concepts practiced** - Filtering expenses by category -
+Calculating category-wise totals and counts - Generating category
+summaries - Counting occurrences with dictionaries - Grouping records by
+category - Aggregating product quantities - Handling empty inputs and
+edge cases - Understanding references, shallow copies, and deep copies -
+Writing automated tests for expected behavior and edge cases
 
-**Tech stack:** Python
+**Tech stack:** Python, `unittest`
 
 ## Learning Notes
 
-- [Week 1 — Python Fundamentals](week-01-python/notes.md)
+-   [Week 1 --- Python Fundamentals](week-01-python/notes.md)
 
-These notes document the concepts, examples, mistakes, and lessons learned throughout my practice.
+The notes capture key concepts, code examples, mistakes, and lessons
+from hands-on practice.
 
 ## Learning Approach
 
-- Learn one concept at a time.
-- Practice by solving problems independently.
-- Test edge cases instead of relying only on expected examples.
-- Document mistakes and revisit concepts when necessary.
-- Build practical projects before progressing to more advanced topics.
+-   Learn one concept at a time.
+-   Attempt exercises independently before reviewing solutions.
+-   Test edge cases, not just typical inputs.
+-   Document mistakes and revisit weak areas.
+-   Build practical projects before moving to advanced topics.
 
 ## Current Focus
 
-**Python fundamentals and automated testing.**
+**Python fundamentals, automated testing, and error handling.**
 
-The goal is to develop a solid foundation before moving into APIs, LLM integration, RAG, and production AI applications.
+The goal is to build a reliable foundation before moving into APIs, LLM
+integration, RAG, and production AI applications.
