@@ -1,4 +1,6 @@
-from expense_analyzer import calculate_total,average_expense,highest_expense,calculate_total_safe
+
+from expense_analyzer.calculations import calculate_total,average_expense,highest_expense
+from expense_analyzer.validations import calculate_total_safe
 import unittest
 
 class TestExpenseAnalyzer(unittest.TestCase):
