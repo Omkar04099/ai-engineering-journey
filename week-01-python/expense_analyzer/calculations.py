@@ -79,3 +79,16 @@ def count_fruits(fruits):
     else:
       fruit_count[fruit] = 1
   return fruit_count
+
+def calculate_total_from_strings(expenses):
+  total = 0
+  for expense in expenses:
+    try:
+      amount = int(expense["amount"])
+    except KeyError:
+      print(f"Amount key not available in:{expense}")
+    except ValueError:
+      print(f"Invalid amount for category:{expense.get('category','Unknown')}")
+    else:
+      total += amount
+  return total

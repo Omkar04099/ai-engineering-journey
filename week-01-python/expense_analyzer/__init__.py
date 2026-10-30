@@ -1,3 +1,3 @@
-from .calculations import (highest_expense, calculate_total,average_expense,calculate_category_total,total_by_category,summarize_orders,summarize_expenses_by_category,summarize_category,count_fruits)
+from .calculations import (highest_expense, calculate_total,average_expense,calculate_category_total,total_by_category,summarize_orders,summarize_expenses_by_category,summarize_category,count_fruits,calculate_total_from_strings)
 from .validations import calculate_total_safe
 from .filters import (filter_by_category,filter_expenses,group_expenses_by_category)

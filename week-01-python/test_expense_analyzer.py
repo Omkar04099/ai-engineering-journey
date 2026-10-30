@@ -1,5 +1,5 @@
 
-from expense_analyzer.calculations import calculate_total,average_expense,highest_expense
+from expense_analyzer.calculations import calculate_total,average_expense,highest_expense,calculate_total_from_strings
 from expense_analyzer.validations import calculate_total_safe
 import unittest
 
@@ -152,3 +152,26 @@ class TestExpenseAnalyzer(unittest.TestCase):
 
         total = calculate_total_safe(expenses)
         self.assertEqual(total, 300)
+
+    def test_calculate_total_from_strings_with_invalid_amount(self):
+        expenses = [
+        {"category": "food", "amount": "100"},
+        {"category": "travel", "amount": "invalid"},
+        {"category": "shopping", "amount": "300"},
+        {"category": "bills", "amount": "50"}
+        ]
+        original_expenses = expenses.copy()
+        total = calculate_total_from_strings(expenses)
+        self.assertEqual(total,450)
+        self.assertEqual(original_expenses,expenses)
+    
+    def test_calculate_total_from_string_without_amount_key(self):
+        expenses = [
+        {"category": "food", "amount": "100"},
+        {"category": "travel", "amount": "invalid"},
+        {"category": "shopping", "amount": "300"},
+        {"category": "bills", "amount": "50"},
+        {"category": "utilities"}
+        ]
+        total = calculate_total_from_strings(expenses)
+        self.assertEqual(total,450)

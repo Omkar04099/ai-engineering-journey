@@ -12,7 +12,8 @@ I'm focusing on strong programming fundamentals, deep understanding, and practic
 - [x] Automated testing with `assert` and `unittest` — Day 4
 - [x] Input validation and defensive programming — Day 5
 - [x] Python modules, packages, imports, and project structure — Day 6
-- [ ] Python exceptions and error handling — Day 7
+- [x] Python exceptions and error handling — Day 7
+- [ ] Python file handling and JSON — Day 8
 - [ ] FastAPI and REST APIs
 - [ ] Databases and backend integration
 - [ ] LLM fundamentals and API integration
@@ -44,6 +45,8 @@ A Python project for practising core programming concepts by processing expense 
 - Separating reusable logic from application execution
 - Using `if __name__ == "__main__":` to guard the application entry point
 - Testing the project after refactoring
+- Handling expected exceptions with `try`, `except`, `else`, and `finally`
+- Distinguishing `TypeError`, `ValueError`, and `KeyError`
 
 #### Project structure
 
@@ -66,9 +69,9 @@ week-01-python/
 
 #### Testing
 
-The test suite currently has **19 passing tests**, covering the expense-processing functions and defensive validation in `calculate_total_safe()`.
+The existing test suite has **19 tests** covering the expense-processing functions and defensive validation in `calculate_total_safe()`. The separate `calculate_total_from_strings()` practice exercises from Day 7 have not yet been integrated into the project test suite.
 
-Run the tests from the project directory:
+Run the existing tests from the project directory:
 
 ```bash
 python -m unittest test_expense_analyzer.py
@@ -97,6 +100,6 @@ Detailed explanations, examples, mistakes, and lessons from each study session a
 
 ## Current Focus
 
-**Day 7: Python exceptions and error handling.**
+**Day 8: Python file handling and JSON.**
 
-The next step is to understand `try`, `except`, `else`, and `finally`, then practise handling errors before moving toward APIs, LLM integration, RAG, and production AI applications.
+The next step is to learn how to read and write files, then work with JSON data. These fundamentals will support later work with REST APIs, databases, and AI applications.
