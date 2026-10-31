@@ -1,0 +1,38 @@
+[
+    {
+        "category": "food",
+        "amount": 150
+    },
+    {
+        "category": "travel",
+        "amount": 80
+    },
+    {
+        "category": "food",
+        "amount": 120
+    },
+    {
+        "category": "shopping",
+        "amount": 500
+    },
+    {
+        "category": "travel",
+        "amount": 50
+    },
+    {
+        "category": "food",
+        "amount": 200
+    },
+    {
+        "category": "utilities",
+        "amount": 120
+    },
+    {
+        "category": "utilities",
+        "amount": 120
+    },
+    {
+        "category": "utilities",
+        "amount": 120
+    }
+]

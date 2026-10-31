@@ -13,7 +13,7 @@ I'm focusing on strong programming fundamentals, deep understanding, and practic
 - [x] Input validation and defensive programming — Day 5
 - [x] Python modules, packages, imports, and project structure — Day 6
 - [x] Python exceptions and error handling — Day 7
-- [ ] Python file handling and JSON — Day 8
+- [x] Python file handling, JSON, basic persistence, and error handling — Day 8
 - [ ] FastAPI and REST APIs
 - [ ] Databases and backend integration
 - [ ] LLM fundamentals and API integration
@@ -47,6 +47,11 @@ A Python project for practising core programming concepts by processing expense 
 - Testing the project after refactoring
 - Handling expected exceptions with `try`, `except`, `else`, and `finally`
 - Distinguishing `TypeError`, `ValueError`, and `KeyError`
+- Reading and writing files with context managers
+- Serializing and deserializing JSON with `json.dump()`, `json.load()`, `json.dumps()`, and `json.loads()`
+- Persisting expense records between program executions
+- Handling missing files and malformed JSON
+- Testing persistence behavior with `unittest`
 
 #### Project structure
 
@@ -58,23 +63,35 @@ week-01-python/
 │   ├── filters.py
 │   └── validations.py
 ├── main.py
+├── persistent_expense_analyzer.py
 ├── test_expense_analyzer.py
+├── test_persistent_expense_analyzer.py
+├── expenses.json
 └── notes.md
 ```
+
+This is the core structure; small practice scripts and data fixtures may also be present while learning.
 
 #### Tech stack
 
 - Python
 - `unittest`
+- JSON
 
 #### Testing
 
-The existing test suite has **19 tests** covering the expense-processing functions and defensive validation in `calculate_total_safe()`. The separate `calculate_total_from_strings()` practice exercises from Day 7 have not yet been integrated into the project test suite.
+The existing Expense Analyzer test suite has 19 tests covering expense-processing functions and defensive validation in `calculate_total_safe()`. The separate `calculate_total_from_strings()` practice exercise from Day 7 has not yet been integrated into the project test suite.
 
-Run the existing tests from the project directory:
+Run the existing tests from the `week-01-python` directory:
 
 ```bash
 python -m unittest test_expense_analyzer.py
+```
+
+Run the persistence tests:
+
+```bash
+python -m unittest test_persistent_expense_analyzer.py
 ```
 
 Run the sample application:
@@ -82,6 +99,8 @@ Run the sample application:
 ```bash
 python main.py
 ```
+
+Note: `main.py` currently adds a utilities expense each time it runs. Repeated runs therefore increase the number of records in `expenses.json`.
 
 #### Learning notes
 
@@ -97,9 +116,10 @@ Detailed explanations, examples, mistakes, and lessons from each study session a
 - Document mistakes and revisit weak areas.
 - Refactor code without breaking existing behaviour.
 - Build practical projects before moving to advanced topics.
+- Keep each daily study session within two hours.
 
 ## Current Focus
 
-**Day 8: Python file handling and JSON.**
+**Completed:** Day 8 — Python file handling, JSON, and basic persistence.
 
-The next step is to learn how to read and write files, then work with JSON data. These fundamentals will support later work with REST APIs, databases, and AI applications.
+**Next:** Learn temporary files properly and use them to make persistence tests independent of manually prepared files.

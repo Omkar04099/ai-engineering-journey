@@ -3,6 +3,7 @@ from expense_analyzer import (
     highest_expense,
     calculate_total_safe,
 )
+from persistent_expense_analyzer import (add_expense,save_expenses,load_expenses)
 
 def main():
     expenses = [
@@ -12,7 +13,6 @@ def main():
         {"category": "shopping", "amount": 500},
         {"category": "travel", "amount": 50},
         {"category": "food", "amount": 200},
-        {"category": "utilities", "amount": 300},
     ]
 
     expenses_unsafe = [
@@ -36,13 +36,18 @@ def main():
     fruits = ["apple", "banana", "apple", "orange", "banana", "apple"]
 
     
-    total = calculate_total(expenses)
-    highest_exp = highest_expense(expenses)
-    safe_total = calculate_total_safe(expenses_unsafe)
-
-    print("Total expenses:", total)
-    print("Highest expense:", highest_exp)
-    print("Safe total:", safe_total)
+    # total = calculate_total(expenses)
+    # highest_exp = highest_expense(expenses)
+    # safe_total = calculate_total_safe(expenses_unsafe)
+    existing_expenses = load_expenses()
+    new_expenses = add_expense(existing_expenses, {"category": "utilities", "amount": 120})
+    save_expenses(new_expenses)
+    latest_expenses = load_expenses()
+    print(latest_expenses)
+    print("Total number of expenses: ",len(latest_expenses))
+    # print("Total expenses:", total)
+    # print("Highest expense:", highest_exp)
+    # print("Safe total:", safe_total)
 
 
 
