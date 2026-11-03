@@ -15,6 +15,7 @@ I'm focusing on strong programming fundamentals, deep understanding, and practic
 - [x] Python exceptions and error handling — Day 7
 - [x] Python file handling, JSON, persistence, and persistence tests — Day 8
 - [x] Temporary files, test setup/cleanup, exception assertions, and JSON data validation — Day 9
+- [x] Strict expense validation, non-finite number handling, and integration testing — Day 10
 - [ ] FastAPI and REST APIs
 - [ ] Databases and backend integration
 - [ ] LLM fundamentals and API integration
@@ -58,6 +59,10 @@ A Python project for practising core programming concepts by processing expense 
 - Using `setUp()` and `tearDown()` to isolate test setup and cleanup
 - Testing expected exceptions with `assertRaises()` and `assertRaisesRegex()`
 - Validating JSON root types and individual expense records
+- Rejecting Boolean values when validating numeric amounts
+- Handling NaN and positive/negative infinity with `math.isfinite()`
+- Validating every expense record using `all()` and a generator expression
+- Understanding short-circuit evaluation
 
 #### Tech stack
 
@@ -96,11 +101,13 @@ python main.py
 
 Note: `main.py` currently adds a utilities expense each time it runs. Repeated runs therefore increase the number of records in `expenses.json`. Be mindful when running it repeatedly.
 
+**Latest test result:** All 19 persistence and validation tests passed.
+
 #### Current status and next step
 
-Completed through Day 9: Python fundamentals, testing, exceptions, JSON persistence, temporary files, and basic expense-data validation.
+Completed through Day 10: Python fundamentals, testing, exceptions, JSON persistence, temporary files, strict expense validation, and integration testing.
 
-**Next session:** Integrate `is_valid_expense()` into `load_expenses()` so every record in a valid JSON list is checked. Add tests for lists containing invalid records, run the full suite, then update the learning notes.
+**Next session:** Introduction to FastAPI — understand what FastAPI is, why it is used, how it compares with Flask, and build the first basic API endpoint.
 
 ## Learning Approach
 
@@ -114,6 +121,6 @@ Completed through Day 9: Python fundamentals, testing, exceptions, JSON persiste
 
 ## Current Focus
 
-**Completed:** Day 9 — temporary files, test lifecycle, exception assertions, and JSON/expense validation.
+**Completed:** Day 10 — strict expense validation, non-finite number handling, and integration testing. All 19 tests passed.
 
-**Next:** Validate each expense record loaded from JSON and integrate the validator into persistence loading.
+**Next:** Day 11 — Introduction to FastAPI and building the first basic API endpoint.

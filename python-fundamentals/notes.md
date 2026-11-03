@@ -328,11 +328,53 @@ self.assertFalse(output)
 
 `["food", 150]` is a non-empty list and is truthy. The function result is `False`, which is what the test must check.
 
-### Next step
 
-Integrate `is_valid_expense()` into `load_expenses()` so every item in the JSON list is validated. Add tests for a list containing an invalid item and for a fully valid list. The current exercise plan is to reject the entire file (`[]`) if any item is invalid.
+**## Day 10: Numeric Validation and Integration Testing**
 
-## Mistakes and Lessons to Remember
+**### Non-finite numbers**
+
+- `float("nan")` represents Not a Number.
+- `float("inf")` and `float("-inf")` represent positive and negative infinity.
+- Comparisons with NaN do not behave like normal numeric comparisons.
+- Use `math.isfinite(value)` to reject NaN and infinity.
+
+```python
+import math
+
+math.isfinite(150)          # True
+math.isfinite(float("nan")) # False
+math.isfinite(float("inf")) # False
+```
+
+**### Strict expense validation**
+
+- Integrated `is_valid_expense()` into `load_expenses()`.
+- Used `all()` with a generator expression to validate every expense.
+- The entire dataset is rejected (`[]`) if any record is invalid.
+- `all()` stops at the first `False` result (short-circuit evaluation).
+- `all([])` returns `True`.
+
+```python
+if not all(is_valid_expense(expense) for expense in expenses):
+    return []
+
+return expenses
+```
+
+**### Testing**
+
+Added tests for:
+- NaN, positive infinity, and negative infinity.
+- Valid and invalid expense lists.
+- Invalid record types and amounts.
+
+**Result: All 19 tests passed.**
+
+**### Next step**
+
+Review Days 1–10, verify and commit the completed changes, then assess Python fundamentals before starting FastAPI and REST APIs.
+
+**## Mistakes and Lessons to Remember**
 
 - Use descriptive variable names and initialize accumulators correctly.
 - Use function arguments instead of unrelated global variables.
@@ -350,8 +392,12 @@ Integrate `is_valid_expense()` into `load_expenses()` so every item in the JSON 
 - Rerun tests after refactoring to detect regressions.
 - Validate JSON syntax, root structure, and individual records as separate layers.
 - Test the result returned by a function, not the truthiness of its input.
+- Reject Boolean values explicitly when validating numeric input.
+- Use `math.isfinite()` when finite numbers are required.
+- Understand short-circuit evaluation with `all()` and `any()`.
+- Choose strict validation or filtering according to business requirements.
 
-## Progress
+**## Progress**
 
 - [x] Day 1: Lists, dictionaries, loops, and functions
 - [x] Day 2: Filtering, aggregation, and copying
@@ -362,5 +408,6 @@ Integrate `is_valid_expense()` into `load_expenses()` so every item in the JSON 
 - [x] Day 7: Exceptions and error handling
 - [x] Day 8: File handling, JSON, and persistence
 - [x] Day 9: Temporary files, test lifecycle, exception assertions, and validation exercises
+- [x] Day 10: Numeric validation, strict JSON validation, and integration testing
 
-**Next session:** Integrate `is_valid_expense()` into `load_expenses()`, add invalid-list tests, run all tests, and then commit the verified changes.
+**Next session:** Introduction to FastAPI — understand what FastAPI is, why we use it, how it compares with Flask, and how to build our first basic API endpoint.

@@ -95,6 +95,115 @@ class TestPersistentExpenseAnalyzer(unittest.TestCase):
         expense = ["food", 150]
         output = is_valid_expense(expense)
         self.assertFalse(output)
+    
+    def test_is_valid_expense_nan(self):
+        expense = {"category": "food", "amount": float("nan")}
+        output = is_valid_expense(expense)
+        self.assertFalse(output)
 
-            
+    def test_is_valid_expense_positive_infinity(self):
+        expense = {"category": "food", "amount": float("inf")}
+        output = is_valid_expense(expense)
+        self.assertFalse(output)
+
+    def test_is_valid_expense_negative_infinity(self):
+        expense = {"category": "food", "amount": float("-inf")}
+        output = is_valid_expense(expense)
+        self.assertFalse(output)
+
+    def test_load_expenses_valid_file(self):
+        valid_data = [
+            {
+                "category": "food",
+                "amount": 150
+            },
+            {
+                "category": "travel",
+                "amount": 80
+            },
+            {
+                "category": "shopping",
+                "amount": 280
+            }
+        ]
+        with tempfile.NamedTemporaryFile(mode="w",delete=False) as file:
+            temp_file_path = file.name
+            json.dump(valid_data,file,indent=4)
+        try:
+            output = load_expenses(temp_file_path)
+            self.assertEqual(valid_data,output)
+        finally:
+            os.remove(temp_file_path)
+
+    def test_load_expenses_one_invalid(self):
+        one_invalid = [
+            {
+                "category": "food",
+                "amount": 150
+            },
+            {
+                "category": "travel",
+                "amount": 80
+            },
+            {
+                "category": "shopping",
+                "amount": -280
+            }
+        ]
+        with tempfile.NamedTemporaryFile(mode="w",delete=False) as file:
+            temp_file_path = file.name
+            json.dump(one_invalid,file,indent=4)
+        try:
+            output = load_expenses(temp_file_path)
+            self.assertEqual(output,[])
+        finally:
+            os.remove(temp_file_path)
         
+    def test_load_expenses_invalid_item(self):
+        invalid_item_type = [
+            {
+                "category": "food",
+                "amount": 150
+            },
+            {
+                "category": "travel",
+                "amount": 80
+            },
+            {
+                "category": "shopping",
+                "amount": "280"
+            }
+        ]
+        with tempfile.NamedTemporaryFile(mode="w",delete=False) as file:
+            temp_file_path = file.name
+            json.dump(invalid_item_type,file,indent=4)
+        try:
+            output = load_expenses(temp_file_path)
+            self.assertEqual(output,[])
+        finally:
+            os.remove(temp_file_path)
+            
+    def test_load_expenses_non_dict_item(self):
+        invalid_item_list = [
+            {
+                "category": "food",
+                "amount": 150
+            },
+            {
+                "category": "travel",
+                "amount": 80
+            },
+            "invalid data",
+            {
+                "category": "shopping",
+                "amount": 280
+            }
+        ]
+        with tempfile.NamedTemporaryFile(mode="w",delete=False) as file:
+            temp_file_path = file.name
+            json.dump(invalid_item_list,file,indent=4)
+        try:
+            output = load_expenses(temp_file_path)
+            self.assertEqual(output,[])
+        finally:
+            os.remove(temp_file_path)
