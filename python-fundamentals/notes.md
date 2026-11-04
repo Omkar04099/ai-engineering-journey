@@ -370,44 +370,63 @@ Added tests for:
 
 **Result: All 19 tests passed.**
 
-**### Next step**
+## Day 11: Introduction to FastAPI
 
-Review Days 1–10, verify and commit the completed changes, then assess Python fundamentals before starting FastAPI and REST APIs.
+### Environment setup
 
-**## Mistakes and Lessons to Remember**
+- Created a virtual environment using `py -m venv venv`.
+- Activated it using `.\venv\Scripts\Activate.ps1`.
+- Installed FastAPI and Uvicorn.
+- Uvicorn runs the FastAPI application using ASGI.
+- `uvicorn main:app --reload` starts the development server.
+- `/docs` provides interactive Swagger documentation.
 
-- Use descriptive variable names and initialize accumulators correctly.
-- Use function arguments instead of unrelated global variables.
-- Preserve record structure when returning filtered data.
-- Decide and test empty-input behaviour explicitly.
-- Check the count before dividing to calculate an average.
-- Understand whether a copy shares nested mutable objects.
-- Test edge cases, not just the happy path.
-- Use a single pass when it keeps aggregation clear and efficient.
-- Use `continue` to skip a bad record when processing should continue.
-- Distinguish technical validation from business rules.
-- Do not confuse a valid zero value with a missing value.
-- Organize related functions into modules based on responsibility.
-- Keep reusable logic separate from the program's entry point.
-- Rerun tests after refactoring to detect regressions.
-- Validate JSON syntax, root structure, and individual records as separate layers.
-- Test the result returned by a function, not the truthiness of its input.
-- Reject Boolean values explicitly when validating numeric input.
-- Use `math.isfinite()` when finite numbers are required.
-- Understand short-circuit evaluation with `all()` and `any()`.
-- Choose strict validation or filtering according to business requirements.
+### FastAPI fundamentals
 
-**## Progress**
+- `app = FastAPI()` creates the application instance.
+- `@app.get()` defines GET endpoints.
+- `@app.post()` defines POST endpoints.
+- FastAPI supports both `def` and `async def` route handlers.
+- ASGI supports asynchronous communication and WebSockets.
 
-- [x] Day 1: Lists, dictionaries, loops, and functions
-- [x] Day 2: Filtering, aggregation, and copying
-- [x] Day 3: Counting, grouping, and data processing
-- [x] Day 4: Automated testing with `assert` and `unittest`
-- [x] Day 5: Input validation and defensive programming
-- [x] Day 6: Modules, packages, imports, and project structure
-- [x] Day 7: Exceptions and error handling
-- [x] Day 8: File handling, JSON, and persistence
-- [x] Day 9: Temporary files, test lifecycle, exception assertions, and validation exercises
-- [x] Day 10: Numeric validation, strict JSON validation, and integration testing
+### Request parameters
 
-**Next session:** Introduction to FastAPI — understand what FastAPI is, why we use it, how it compares with Flask, and how to build our first basic API endpoint.
+- Path parameters identify resources, e.g. `/users/{user_id}`.
+- Query parameters provide optional or required filters, e.g. `/products?category=electronics&limit=10`.
+- Parameters without defaults are required; parameters with defaults are optional.
+- Type annotations allow FastAPI to validate and convert incoming parameters.
+
+### Request bodies and Pydantic
+
+- `BaseModel` defines structured request data.
+- FastAPI parses JSON request bodies and validates them using Pydantic.
+- `Field(gt=0)` enforces a value greater than zero.
+- `Field(ge=0)` allows zero and positive values.
+- `Field(min_length=1)` rejects empty strings.
+- FastAPI automatically converts returned dictionaries into JSON responses.
+- Invalid request data produces a validation error (HTTP 422).
+
+### Mistakes and Lessons to Remember
+
+- Activate the correct virtual environment for each project.
+- FastAPI and Uvicorn have different responsibilities.
+- Register static routes before conflicting dynamic routes.
+- GET requests from browser address bars cannot invoke POST-only endpoints.
+- Distinguish type validation from business-rule validation.
+- Use appropriate data types and constraints for request fields.
+
+### Next step
+
+- Verify valid and invalid request-body cases.
+- Update GitHub progress and commit the completed work.
+
+### Progress
+
+- [x] Day 11: FastAPI introduction and environment setup.
+- [x] First API endpoints using GET and POST.
+- [x] Path and query parameters.
+- [x] Pydantic models and field validation.
+
+### Next session
+
+**Day 12:** FastAPI request validation, response models, HTTP status codes, and structured API responses.

@@ -103,11 +103,36 @@ Note: `main.py` currently adds a utilities expense each time it runs. Repeated r
 
 **Latest test result:** All 19 persistence and validation tests passed.
 
-#### Current status and next step
+### FastAPI Learning
 
-Completed through Day 10: Python fundamentals, testing, exceptions, JSON persistence, temporary files, strict expense validation, and integration testing.
+A hands-on learning project for understanding backend development and building APIs using FastAPI.
 
-**Next session:** Introduction to FastAPI — understand what FastAPI is, why it is used, how it compares with Flask, and build the first basic API endpoint.
+#### Concepts practised — Day 11
+
+- Creating and activating Python virtual environments
+- Installing FastAPI and Uvicorn
+- Understanding the responsibilities of FastAPI and Uvicorn
+- Introduction to ASGI
+- Running a development server using `uvicorn main:app --reload`
+- Creating GET and POST endpoints
+- Working with path parameters and query parameters
+- Defining request body models using Pydantic `BaseModel`
+- Applying field constraints using Pydantic `Field`
+- Understanding automatic request validation
+- Exploring interactive API documentation through `/docs`
+- Understanding HTTP 422 validation errors
+- Registering static routes before conflicting dynamic routes
+
+#### Tech stack
+
+- Python
+- FastAPI
+- Uvicorn
+- Pydantic
+
+#### Current status
+
+Completed Day 11: Created the first FastAPI application and implemented basic GET and POST endpoints with path parameters, query parameters, and Pydantic request validation.
 
 ## Learning Approach
 
@@ -121,6 +146,6 @@ Completed through Day 10: Python fundamentals, testing, exceptions, JSON persist
 
 ## Current Focus
 
-**Completed:** Day 10 — strict expense validation, non-finite number handling, and integration testing. All 19 tests passed.
+**Completed:** Day 11 — Introduction to FastAPI, first API endpoints, request parameters, and Pydantic validation.
 
-**Next:** Day 11 — Introduction to FastAPI and building the first basic API endpoint.
+**Next:** Day 12 — FastAPI request validation, response models, HTTP status codes, and structured API responses.
