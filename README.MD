@@ -123,6 +123,20 @@ A hands-on learning project for understanding backend development and building A
 - Understanding HTTP 422 validation errors
 - Registering static routes before conflicting dynamic routes
 
+#### Concepts practised — Day 12
+
+- Understanding REST API fundamentals and CRUD operations
+- Learning HTTP methods: GET, POST, PUT, PATCH, and DELETE
+- Understanding the differences between PUT and PATCH
+- Separating request models and response models using Pydantic
+- Creating `ExpenseCreate` and `ExpenseResponse` models
+- Understanding server-generated fields such as resource IDs
+- Understanding why server-managed fields should not be controlled by clients
+- Using FastAPI's `response_model` parameter
+- Understanding response validation, serialization, and field filtering
+- Understanding HTTP status codes: 200, 201, 204, 400, 401, 403, 404, 422, and 500
+- Distinguishing resource-not-found errors from request-validation errors
+
 #### Tech stack
 
 - Python
@@ -132,7 +146,11 @@ A hands-on learning project for understanding backend development and building A
 
 #### Current status
 
-Completed Day 11: Created the first FastAPI application and implemented basic GET and POST endpoints with path parameters, query parameters, and Pydantic request validation.
+**Completed Day 11:** Created the first FastAPI application and implemented basic GET and POST endpoints with path parameters, query parameters, and Pydantic request validation.
+
+**Completed Day 12:** Learned HTTP methods, CRUD fundamentals, request and response models, response filtering using `response_model`, and HTTP status codes. Practised designing expense request and response schemas.
+
+**Upcoming:** Implement all five CRUD operations using FastAPI, in-memory storage, and appropriate HTTP status codes.
 
 ## Learning Approach
 
@@ -146,6 +164,6 @@ Completed Day 11: Created the first FastAPI application and implemented basic GE
 
 ## Current Focus
 
-**Completed:** Day 11 — Introduction to FastAPI, first API endpoints, request parameters, and Pydantic validation.
+**Completed:** Day 12 — FastAPI REST API fundamentals, HTTP methods, request and response models, response filtering, and HTTP status codes.
 
-**Next:** Day 12 — FastAPI request validation, response models, HTTP status codes, and structured API responses.
+**Next:** Day 13 — Implementing CRUD operations using FastAPI, in-memory storage, `HTTPException`, and Swagger UI testing.

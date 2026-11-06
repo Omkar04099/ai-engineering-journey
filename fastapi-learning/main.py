@@ -7,6 +7,19 @@ class Product(BaseModel):
     quantity:int = Field(ge=0)
     in_stock:bool
 
+class ExpenseCreate(BaseModel):
+    title:str
+    amount:float
+    category:str
+
+class ExpenseResponse(BaseModel):
+    id:int
+    title:str
+    amount:float
+    category:str
+
+
+
 app = FastAPI()
 
 @app.get("/")
@@ -60,4 +73,15 @@ def create_product(product:Product):
         "price":product.price,
         "quantity":product.quantity,
         "in_stock":product.in_stock
+    }
+
+@app.get("/expenses/{expense_id}",response_model=ExpenseResponse)
+def expense_response(expense_id:int):
+    return {
+        "id": expense_id,
+        "title": expense.title,
+        "amount": expense.amount,
+        "category": expense.category,
+        "created_by": "Admin 123",
+        "is_deleted": True
     }

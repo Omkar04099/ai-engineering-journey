@@ -406,27 +406,136 @@ Added tests for:
 - FastAPI automatically converts returned dictionaries into JSON responses.
 - Invalid request data produces a validation error (HTTP 422).
 
-### Mistakes and Lessons to Remember
 
-- Activate the correct virtual environment for each project.
-- FastAPI and Uvicorn have different responsibilities.
-- Register static routes before conflicting dynamic routes.
-- GET requests from browser address bars cannot invoke POST-only endpoints.
-- Distinguish type validation from business-rule validation.
-- Use appropriate data types and constraints for request fields.
+# Day 12 — FastAPI REST API Fundamentals
 
-### Next step
+## Topics Covered
 
-- Verify valid and invalid request-body cases.
-- Update GitHub progress and commit the completed work.
+### 1. HTTP Methods and CRUD
 
-### Progress
+Learned the purpose of HTTP methods used in REST APIs:
 
-- [x] Day 11: FastAPI introduction and environment setup.
-- [x] First API endpoints using GET and POST.
-- [x] Path and query parameters.
-- [x] Pydantic models and field validation.
+| HTTP Method | Operation | Purpose |
+|---|---|---|
+| GET | Read | Retrieve resources |
+| POST | Create | Create new resources |
+| PUT | Update | Replace an existing resource |
+| PATCH | Partial Update | Modify selected fields |
+| DELETE | Delete | Remove a resource |
 
-### Next session
+### 2. PUT vs PATCH
 
-**Day 12:** FastAPI request validation, response models, HTTP status codes, and structured API responses.
+- PUT generally replaces the complete resource representation.
+- PATCH modifies only the specified fields.
+- Both methods can accept request bodies.
+
+### 3. Request Models vs Response Models
+
+Practised creating separate Pydantic models for incoming and outgoing data.
+
+**ExpenseCreate:**
+- Defines the fields expected from the client.
+- Used to validate incoming request data.
+- Does not contain server-generated fields such as `id`.
+- Server-managed fields such as `created_by` and `is_deleted` should not be controlled by the client.
+
+**ExpenseResponse:**
+- Defines the structure of the API response.
+- Includes the server-generated expense ID.
+- Controls which fields are exposed to the frontend.
+
+### 4. FastAPI Response Models
+
+Learned how to use `response_model`:
+
+```python
+@app.get("/expenses/{expense_id}", response_model=ExpenseResponse)
+def expense_response(expense_id: int):
+    return {
+        "id": expense_id,
+        "title": "Electricity Bill",
+        "amount": 1200,
+        "category": "Utilities",
+        "created_by": "Admin 123",
+        "is_deleted": True
+    }
+```
+
+FastAPI uses the response model to:
+- Validate returned data.
+- Serialize the response.
+- Filter out fields not defined in the response model.
+- Generate API documentation.
+
+Important: Response filtering is useful for controlling exposed fields, but it does not replace authorization and security checks.
+
+### 5. HTTP Status Codes
+
+| Status Code | Meaning |
+|---|---|
+| 200 | OK |
+| 201 | Created |
+| 204 | No Content |
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 403 | Forbidden |
+| 404 | Not Found |
+| 422 | Unprocessable Content |
+| 500 | Internal Server Error |
+
+Important distinctions:
+- 404: Requested resource does not exist.
+- 422: Request data failed validation.
+- 204: Successful operation with no response body.
+
+FastAPI automatically returns 422 for standard request validation failures.
+
+## Mistakes and Lessons to Remember
+
+1. A GET endpoint using a path parameter does not need an `ExpenseCreate` request body when retrieving an expense by ID.
+2. Path parameter names should match the endpoint function parameters.
+3. Use explicit type annotations such as `expense_id: int`.
+4. Never access attributes that are not defined in the corresponding Pydantic model.
+5. Do not allow clients to control server-generated or server-managed fields.
+6. Separate request and response models according to their responsibilities.
+7. Extra fields returned by an endpoint are filtered when they are not included in its response model.
+8. GET should retrieve resources rather than modify server state.
+9. POST is commonly used for resource creation, while PUT and PATCH are used for updates.
+
+## Exercises and Assessment
+
+- HTTP methods exercise: 5/5.
+- HTTP status codes exercise: 5/5.
+- Implemented and reviewed the structure of `ExpenseCreate` and `ExpenseResponse`.
+- Practised identifying incorrect request-body parameters and model attribute access.
+
+## Progress
+
+**Completed:**
+- HTTP methods and CRUD fundamentals.
+- Request models and response models.
+- Response filtering with `response_model`.
+- HTTP status codes and their practical applications.
+
+**Not yet completed:**
+- Full CRUD endpoint implementation.
+- Handling missing resources with `HTTPException`.
+- Testing CRUD operations using Swagger UI.
+
+## Next Step
+
+**Day 13 — Implementing CRUD operations using FastAPI.**
+
+We will:
+1. Store expenses in an in-memory Python list.
+2. Implement POST to create expenses.
+3. Implement GET to retrieve all expenses and individual expenses.
+4. Implement PUT and PATCH to update expenses.
+5. Implement DELETE to remove expenses.
+6. Handle missing expense IDs using `HTTPException`.
+7. Return appropriate HTTP status codes.
+8. Test all endpoints through Swagger UI.
+
+We will use in-memory storage first and introduce database integration later.
+
+**Key takeaway:** Understand the complete request-response lifecycle before introducing databases or advanced backend concepts.
