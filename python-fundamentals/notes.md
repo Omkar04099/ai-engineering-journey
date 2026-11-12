@@ -490,52 +490,197 @@ Important distinctions:
 
 FastAPI automatically returns 422 for standard request validation failures.
 
-## Mistakes and Lessons to Remember
+# Day 13: FastAPI CRUD Operations and Python Variable Scope
 
-1. A GET endpoint using a path parameter does not need an `ExpenseCreate` request body when retrieving an expense by ID.
-2. Path parameter names should match the endpoint function parameters.
-3. Use explicit type annotations such as `expense_id: int`.
-4. Never access attributes that are not defined in the corresponding Pydantic model.
-5. Do not allow clients to control server-generated or server-managed fields.
-6. Separate request and response models according to their responsibilities.
-7. Extra fields returned by an endpoint are filtered when they are not included in its response model.
-8. GET should retrieve resources rather than modify server state.
-9. POST is commonly used for resource creation, while PUT and PATCH are used for updates.
+## 1. Implementing CRUD Operations
 
-## Exercises and Assessment
+Completed the CRUD functionality for the Expense API using FastAPI and Pydantic.
 
-- HTTP methods exercise: 5/5.
-- HTTP status codes exercise: 5/5.
-- Implemented and reviewed the structure of `ExpenseCreate` and `ExpenseResponse`.
-- Practised identifying incorrect request-body parameters and model attribute access.
+| Operation | HTTP Method | Endpoint | Expected Status |
+|---|---|---|---|
+| Create expense | POST | `/expenses` | 201 Created |
+| Fetch all expenses | GET | `/expenses` | 200 OK |
+| Fetch expense by ID | GET | `/expenses/{expense_id}` | 200 OK / 404 |
+| Replace expense | PUT | `/expenses/{expense_id}` | 200 OK / 404 |
+| Partially update expense | PATCH | `/expenses/{expense_id}` | 200 OK / 404 |
+| Delete expense | DELETE | `/expenses/{expense_id}` | 204 No Content / 404 |
 
-## Progress
+## 2. Request and Response Models
 
-**Completed:**
-- HTTP methods and CRUD fundamentals.
-- Request models and response models.
-- Response filtering with `response_model`.
-- HTTP status codes and their practical applications.
+Used separate Pydantic models for different API responsibilities:
 
-**Not yet completed:**
-- Full CRUD endpoint implementation.
-- Handling missing resources with `HTTPException`.
-- Testing CRUD operations using Swagger UI.
+- `ExpenseCreate`: Validates expense creation and replacement input.
+- `ExpenseResponse`: Defines the structure returned by the API, including the server-generated ID.
+- `ExpenseUpdate`: Allows partial updates through optional fields.
 
-## Next Step
+## 3. PUT vs PATCH
 
-**Day 13 — Implementing CRUD operations using FastAPI.**
+**PUT**
+- Replaces the editable fields of an existing resource.
+- Requires all fields defined by `ExpenseCreate`.
+- Preserves the original resource ID.
 
-We will:
-1. Store expenses in an in-memory Python list.
-2. Implement POST to create expenses.
-3. Implement GET to retrieve all expenses and individual expenses.
-4. Implement PUT and PATCH to update expenses.
-5. Implement DELETE to remove expenses.
-6. Handle missing expense IDs using `HTTPException`.
-7. Return appropriate HTTP status codes.
-8. Test all endpoints through Swagger UI.
+**PATCH**
+- Updates only the fields provided by the client.
+- Uses `model_dump(exclude_unset=True)` to exclude fields that were not supplied.
 
-We will use in-memory storage first and introduce database integration later.
+Example:
 
-**Key takeaway:** Understand the complete request-response lifecycle before introducing databases or advanced backend concepts.
+```python
+expense.update(exp.model_dump(exclude_unset=True))
+```
+
+## 4. Python Mutable Objects and Variable Scope
+
+Learned the difference between modifying an existing object and reassigning a variable.
+
+**Modifying a mutable object:**
+
+```python
+expenses = []
+
+def add_expense():
+    expenses.append({"id": 1})
+```
+
+This works without `global` because the existing list is being modified.
+
+**Reassigning a global variable:**
+
+```python
+counter = 1
+
+def increment():
+    global counter
+    counter += 1
+```
+
+The `global` keyword tells Python that the function should use and modify the module-level variable.
+
+Key distinction:
+
+- `expenses.append(item)` modifies an existing list.
+- `counter += 1` reassigns an integer variable.
+
+## 5. Stable ID Generation
+
+Initially, IDs were generated using:
+
+```python
+id = len(expenses) + 1
+```
+
+This caused duplicate IDs after deleting an expense.
+
+Example:
+
+- Existing IDs: 1, 2, 3
+- Delete ID 2.
+- List length becomes 2.
+- Next generated ID becomes 3, causing a duplicate.
+
+Fixed this by maintaining a separate counter:
+
+```python
+next_expense_id = 1
+
+def create_expense(expense: ExpenseCreate):
+    global next_expense_id
+
+    expense_id = next_expense_id
+    next_expense_id += 1
+```
+
+The counter is independent of the list length, so deleted IDs are not reused.
+
+**Production limitation:** A module-level counter is suitable for this learning exercise, but it resets on application restart and is not safe for multiple workers or concurrent ID generation. Databases will provide persistent ID generation later.
+
+## 6. PATCH: Missing Fields vs Explicit Null
+
+Learned the difference between:
+
+```python
+exp.model_dump(exclude_unset=True)
+```
+
+and:
+
+```python
+exp.model_dump(exclude_none=True)
+```
+
+- `exclude_unset=True`: Excludes fields the client did not provide.
+- `exclude_none=True`: Excludes fields whose values are `None`.
+
+Example request:
+
+```json
+{
+    "amount": 500
+}
+```
+
+With `exclude_unset=True`:
+
+```python
+{"amount": 500}
+```
+
+Example request:
+
+```json
+{
+    "amount": 500,
+    "title": null
+}
+```
+
+With `exclude_unset=True`:
+
+```python
+{"amount": 500, "title": None}
+```
+
+Important: `exclude_unset=True` preserves the distinction between an omitted field and an explicitly supplied `null`.
+
+The current `ExpenseUpdate` model still permits explicit null values. This validation issue is pending and will be addressed after learning Pydantic validators.
+
+### Next step
+
+Learn Pydantic validators from the fundamentals:
+1. Understand what validation is and why it is needed.
+2. Learn field-level and model-level validation.
+3. Understand how validators handle incoming data.
+4. Apply validation to `ExpenseUpdate`.
+5. Test omitted fields, valid values, and explicit null values.
+
+### Mistakes and Lessons to Remember
+
+- List positions and record IDs are different concepts.
+- Never generate persistent record IDs using the current list length.
+- Use descriptive variable names instead of shadowing built-in names such as `id`.
+- Mutating an existing list or dictionary differs from reassigning a global variable.
+- Use `global` when reassigning a module-level variable inside a function.
+- PUT replaces editable resource fields; PATCH updates only supplied fields.
+- `exclude_unset=True` and `exclude_none=True` solve different problems.
+- A response model should remain consistent with the data returned by the API.
+- DELETE with status 204 should not return a response body.
+- In-memory storage and global counters are not production database solutions.
+
+### Progress
+
+- [x] Day 1: Lists, dictionaries, loops, and functions
+- [x] Day 2: Filtering, aggregation, and copying
+- [x] Day 3: Counting, grouping, and data processing
+- [x] Day 4: Automated testing with `assert` and `unittest`
+- [x] Day 5: Input validation and defensive programming
+- [x] Day 6: Modules, packages, imports, and project structure
+- [x] Day 7: Exceptions and error handling
+- [x] Day 8: File handling, JSON, and persistence
+- [x] Day 9: Temporary files, test lifecycle, and validation exercises
+- [x] Day 10: Numeric validation and integration testing
+- [x] Day 11: Introduction to FastAPI and first API
+- [x] Day 12: HTTP methods, status codes, and response models
+- [x] Day 13: CRUD operations, ID generation, and variable scope
+
+**Next session: Day 14 — Pydantic Validators (Fundamentals First)**

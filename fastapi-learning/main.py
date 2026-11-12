@@ -1,4 +1,4 @@
-from fastapi import FastAPI 
+from fastapi import FastAPI,status,HTTPException
 from pydantic import BaseModel, Field
 
 class Product(BaseModel):
@@ -18,9 +18,80 @@ class ExpenseResponse(BaseModel):
     amount:float
     category:str
 
+class ExpenseUpdate(BaseModel):
+    title: str | None = None
+    amount: float | None = Field(default=None,gt=0)
+    category: str | None = None
+
+expenses = []
+next_expense_id = 1
 
 
 app = FastAPI()
+
+@app.post("/expenses",status_code=status.HTTP_201_CREATED,response_model=ExpenseResponse)
+def create_expense(expense:ExpenseCreate):
+    global next_expense_id
+    id = next_expense_id
+    curr_expense = expense.model_dump()
+    curr_expense["id"] = id
+    expenses.append(curr_expense)
+    next_expense_id +=1
+    return {
+        "id": id,
+        "title": expense.title,
+        "amount":expense.amount,
+        "category":expense.category
+    }
+
+@app.get("/expenses",response_model=list[ExpenseResponse])
+def get_expenses():
+    return expenses
+
+@app.get("/expenses/{expense_id}",response_model=ExpenseResponse)
+def expense_response(expense_id:int):
+    for expense in expenses:
+        if expense["id"] == expense_id:
+            return expense
+    raise HTTPException(
+        status_code= status.HTTP_404_NOT_FOUND,
+        detail="Expense not found"
+    )
+
+@app.put("/expenses/{expense_id}",response_model=ExpenseResponse)
+def edit_expense(expense_id:int,exp:ExpenseCreate):
+    for expense in expenses:
+        if expense["id"] == expense_id:
+            original_id = expense["id"]
+            expense.update(exp.model_dump())
+            expense["id"] = original_id
+            return expense
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"expense not found for {expense_id}"
+    )
+    
+@app.patch("/expenses/{expense_id}",response_model=ExpenseResponse)
+def update_expense(exp:ExpenseUpdate,expense_id:int):
+    for expense in expenses:
+        if expense["id"] == expense_id:
+            expense.update(exp.model_dump(exclude_unset=True))
+            return expense
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"expense not found for {expense_id}"
+    )
+
+@app.delete("/expenses/{expense_id}",status_code=status.HTTP_204_NO_CONTENT)
+def delete_expense(expense_id:int):
+    for expense in expenses:
+        if expense["id"] == expense_id:
+            expenses.remove(expense)
+            return
+    raise HTTPException(
+        status_code = status.HTTP_404_NOT_FOUND,
+        detail=f"expense not found for {expense_id}"
+    )
 
 @app.get("/")
 def home():
@@ -75,13 +146,3 @@ def create_product(product:Product):
         "in_stock":product.in_stock
     }
 
-@app.get("/expenses/{expense_id}",response_model=ExpenseResponse)
-def expense_response(expense_id:int):
-    return {
-        "id": expense_id,
-        "title": expense.title,
-        "amount": expense.amount,
-        "category": expense.category,
-        "created_by": "Admin 123",
-        "is_deleted": True
-    }
