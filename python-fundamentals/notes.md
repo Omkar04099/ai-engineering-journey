@@ -645,42 +645,164 @@ Important: `exclude_unset=True` preserves the distinction between an omitted fie
 
 The current `ExpenseUpdate` model still permits explicit null values. This validation issue is pending and will be addressed after learning Pydantic validators.
 
-### Next step
+## Day 14: Pydantic Validators, Pytest, and Regex Fundamentals
 
-Learn Pydantic validators from the fundamentals:
-1. Understand what validation is and why it is needed.
-2. Learn field-level and model-level validation.
-3. Understand how validators handle incoming data.
-4. Apply validation to `ExpenseUpdate`.
-5. Test omitted fields, valid values, and explicit null values.
+### 1. Pydantic Field Validators
 
-### Mistakes and Lessons to Remember
+Learned how to add custom validation and preprocessing to Pydantic models using `@field_validator`.
 
-- List positions and record IDs are different concepts.
-- Never generate persistent record IDs using the current list length.
-- Use descriptive variable names instead of shadowing built-in names such as `id`.
-- Mutating an existing list or dictionary differs from reassigning a global variable.
-- Use `global` when reassigning a module-level variable inside a function.
-- PUT replaces editable resource fields; PATCH updates only supplied fields.
-- `exclude_unset=True` and `exclude_none=True` solve different problems.
-- A response model should remain consistent with the data returned by the API.
-- DELETE with status 204 should not return a response body.
-- In-memory storage and global counters are not production database solutions.
+**Before validators**
+
+- Use `mode="before"` to process raw input before Pydantic performs its normal type validation.
+- Useful for cleaning or transforming incoming values.
+- Example: removing a currency symbol and surrounding whitespace before converting an amount to a float.
+
+**After validators**
+
+- The default validator mode is `after`.
+- Runs after Pydantic has validated and converted the field's type.
+- Useful for normalizing or checking already validated values.
+
+**Example concepts practised:**
+
+- Removing leading and trailing whitespace from titles and categories using `.strip()`.
+- Converting categories to lowercase using `.lower()`.
+- Removing the `₹` symbol from string amounts before numeric conversion.
+- Using `Field(gt=0)` to enforce a positive amount.
+- Raising `ValueError` when custom validation fails.
+
+### 2. Pydantic Validation Errors
+
+- `ValidationError` is raised by Pydantic when model validation fails.
+- `ValueError` is a built-in Python exception that can be raised inside a custom validator.
+- Pydantic catches validator errors and reports them as a `ValidationError`.
+- `model_validate()` validates a Python dictionary against a Pydantic model.
+- `.errors()` returns structured validation error details.
+- Error details include fields such as `loc`, `msg`, `type`, and `input`.
+
+### 3. Testing with Pytest
+
+Started using `pytest` for FastAPI-related tests.
+
+Practised:
+
+- Writing test functions whose names begin with `test_`.
+- Using regular Python `assert` statements.
+- Using `pytest.raises(ValidationError)` to verify expected validation failures.
+- Inspecting validation details using `exc_info.value.errors()`.
+- Checking that multiple invalid fields are reported.
+
+Example:
+
+```python
+with pytest.raises(ValidationError) as exc_info:
+    ExpenseCreate.model_validate(expense_data)
+
+errors = exc_info.value.errors()
+assert len(errors) == 3
+```
+
+Pytest can also run tests written using Python's `unittest` framework.
+
+### 4. Python Regular Expressions (Regex)
+
+Learned the fundamentals of the `re` module for pattern-based string validation.
+
+**Raw strings**
+
+- The `r` prefix creates a raw string literal.
+- It prevents Python from interpreting most backslash escape sequences.
+- `r"\d+"` and `"\\d+"` pass equivalent patterns to the regex engine.
+
+**Regex functions practised**
+
+- `re.fullmatch()` checks whether the entire input matches a pattern.
+- `re.search()` searches for a matching portion of a string.
+- `re.findall()` finds all matching occurrences.
+- `re.sub()` replaces matching portions of a string.
+
+**Character classes**
+
+- `\d`: digit.
+- `[0-9]`: digit from 0 to 9.
+- `[a-z]`: lowercase English letter.
+- `[A-Z]`: uppercase English letter.
+- `[a-zA-Z]`: uppercase or lowercase English letter.
+
+**Quantifiers and grouping**
+
+- `+`: one or more occurrences.
+- `*`: zero or more occurrences.
+- `?`: zero or one occurrence.
+- `{3}`: exactly three occurrences.
+- `{2,3}`: between two and three occurrences.
+- `|`: alternation (OR).
+- `(...)`: groups regex elements together.
+- `\.`: matches a literal dot.
+
+### 5. Indian Number Grouping Regex Exercise
+
+Practised building a regex to validate Indian-style comma grouping.
+
+Examples accepted:
+
+- `1500`
+- `150000`
+- `1,500`
+- `15,000`
+- `1,50,000`
+- `10,00,000`
+- `15,00,000`
+- `12,34,56,789`
+
+Examples rejected:
+
+- `1,5,00`
+- `1,,500`
+- `12.50`
+
+The grouped-number pattern:
+
+```python
+grouped = r"[0-9]{1,2}(,[0-9]{2})*,[0-9]{3}"
+```
+
+The ungrouped-number pattern:
+
+```python
+ungrouped = r"\d+"
+```
+
+Combined pattern:
+
+```python
+indian_number_pattern = rf"(?:{ungrouped}|{grouped})"
+```
+
+Validation function:
+
+```python
+import re
+
+def is_valid_number(value):
+    return bool(re.fullmatch(indian_number_pattern, value))
+```
+
+**Important:** This exercise validates the number's digit and comma grouping. Currency symbols, whitespace normalization, and decimal amounts have not yet been integrated.
+
+### 6. Lessons to Remember
+
+- `mode="before"` and `mode="after"` execute at different stages of Pydantic validation.
+- `Field` constraints should be used for standard validation rules where appropriate.
+- A `ValueError` raised inside a Pydantic validator becomes part of Pydantic's validation error.
+- `re.fullmatch()` is useful when the entire input must follow a specific format.
+- Raw strings make regex patterns easier to write and read.
+- A regex should be built and tested incrementally rather than written as one complicated expression.
 
 ### Progress
 
-- [x] Day 1: Lists, dictionaries, loops, and functions
-- [x] Day 2: Filtering, aggregation, and copying
-- [x] Day 3: Counting, grouping, and data processing
-- [x] Day 4: Automated testing with `assert` and `unittest`
-- [x] Day 5: Input validation and defensive programming
-- [x] Day 6: Modules, packages, imports, and project structure
-- [x] Day 7: Exceptions and error handling
-- [x] Day 8: File handling, JSON, and persistence
-- [x] Day 9: Temporary files, test lifecycle, and validation exercises
-- [x] Day 10: Numeric validation and integration testing
-- [x] Day 11: Introduction to FastAPI and first API
-- [x] Day 12: HTTP methods, status codes, and response models
-- [x] Day 13: CRUD operations, ID generation, and variable scope
+- [x] Day 14: Pydantic validators, validation errors, pytest, and regex fundamentals
 
-**Next session: Day 14 — Pydantic Validators (Fundamentals First)**
+### Next Step
+
+Continue with database fundamentals and SQL, followed by database integration with FastAPI.

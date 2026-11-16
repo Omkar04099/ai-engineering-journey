@@ -16,7 +16,7 @@
 - [x] Day 11: Introduction to FastAPI and building the first API
 - [x] Day 12: HTTP methods, status codes, Pydantic request and response models
 - [x] Day 13: Implementing CRUD operations, HTTP exceptions, and stable ID generation
-- [ ] Day 14: Pydantic validators and advanced request validation
+- [x] Day 14: Pydantic validators, validation errors, pytest, and regex fundamentals
 - [ ] Database fundamentals and SQL
 - [ ] Database integration with FastAPI
 - [ ] PostgreSQL and ORM integration
@@ -37,6 +37,10 @@ Built an Expense Management REST API using FastAPI and Pydantic.
 - Return appropriate HTTP status codes.
 - Handle missing resources using `HTTPException`.
 - Generate unique IDs using a separate counter.
+- Apply custom field validation using Pydantic `field_validator`.
+- Normalize incoming title and category values.
+- Preprocess currency-formatted amount strings before numeric validation.
+- Test Pydantic validation behaviour using pytest.
 
 ### Concepts Practised
 
@@ -49,6 +53,12 @@ Built an Expense Management REST API using FastAPI and Pydantic.
 - FastAPI automatic API documentation
 - Python mutable objects and variable scope
 - In-memory data storage
+- Pydantic `field_validator` with before and after modes
+- Pydantic `ValidationError` and structured error details
+- Pytest fundamentals and exception assertions
+- Python regular expressions using the `re` module
+- Regex character classes, quantifiers, grouping, and alternation
+- Indian numbering-system comma grouping validation
 
 ### Current Limitations
 
@@ -58,6 +68,10 @@ This means:
 - Data is lost when the application restarts.
 - The global ID counter resets when the application restarts.
 - In-memory storage is not suitable for concurrent production workloads.
+- Indian currency grouping validation has been practised independently
+  but is not yet integrated into the Expense API's Pydantic validation.
+- Decimal currency input and currency-symbol handling still need
+  complete integration and testing.
 
 The next stage will introduce databases and persistent storage.
 
