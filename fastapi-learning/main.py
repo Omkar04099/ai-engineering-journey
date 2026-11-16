@@ -1,5 +1,5 @@
 from fastapi import FastAPI,status,HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 class Product(BaseModel):
     name:str = Field(min_length=1)
@@ -9,8 +9,36 @@ class Product(BaseModel):
 
 class ExpenseCreate(BaseModel):
     title:str
-    amount:float
+    amount:float = Field(gt=0)
     category:str
+
+    @field_validator("amount",mode="before")
+    @classmethod
+    def validate_amount(cls,value):
+        if isinstance(value,str):
+            value = value.replace("₹","").strip()
+        return value
+        
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls,value):
+        value = value.strip()
+        if not value:
+            raise ValueError("title cannot be empty")
+        return value
+
+        
+
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls,value):
+        value = value.strip()
+
+        if not value:
+            raise ValueError("category cannot be empty")
+        
+        value = value.lower()
+        return value
 
 class ExpenseResponse(BaseModel):
     id:int
