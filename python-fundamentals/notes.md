@@ -799,10 +799,297 @@ def is_valid_number(value):
 - Raw strings make regex patterns easier to write and read.
 - A regex should be built and tested incrementally rather than written as one complicated expression.
 
+## Day 15: Database Fundamentals and SQL
+
+### 1. Why Databases Are Needed
+
+- Python in-memory lists store data temporarily while the application is running.
+- Data stored only in memory is lost when the application restarts.
+- Databases provide persistent storage.
+- A relational database stores structured data in tables.
+
+### 2. Relational Database Fundamentals
+
+- A **table** represents a collection of related records.
+- A **row** represents one complete record.
+- A **column** represents an individual attribute or field.
+- PostgreSQL is a relational database management system (RDBMS).
+- SQL (Structured Query Language) is used to interact with relational databases.
+
+### 3. Primary Keys
+
+A primary key uniquely identifies each record in a table.
+
+Important rules:
+
+- Primary key values must be unique.
+- Primary key values cannot be NULL.
+- A table can have only one primary key constraint.
+- A primary key can consist of one column or multiple columns.
+
+Example:
+
+```sql
+CREATE TABLE expenses (
+    id INTEGER PRIMARY KEY,
+    title VARCHAR(100),
+    amount NUMERIC(10, 2)
+);
+```
+
+A separate `id` column is commonly used as a primary key because expense titles and amounts can repeat.
+
+### 4. Foreign Keys
+
+A foreign key establishes a relationship between two tables.
+
+Example:
+
+```sql
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(100)
+);
+
+CREATE TABLE expenses (
+    id INTEGER PRIMARY KEY,
+    title VARCHAR(100),
+    user_id INTEGER REFERENCES users(id)
+);
+```
+
+Key concepts:
+
+- `users.id` is the referenced primary key.
+- `expenses.user_id` is a foreign key.
+- Multiple expenses can reference the same user.
+- A foreign key prevents references to non-existent records.
+- Foreign-key columns can contain repeated values.
+- Foreign-key columns should use compatible data types with their referenced columns.
+
+### 5. Composite Primary Keys
+
+A composite primary key uses two or more columns together to uniquely identify a record.
+
+Example:
+
+```sql
+CREATE TABLE employee_projects (
+    employee_id INTEGER,
+    project_id INTEGER,
+    role VARCHAR(50),
+    PRIMARY KEY (employee_id, project_id)
+);
+```
+
+Important points:
+
+- `employee_id` alone may not be unique.
+- `project_id` alone may not be unique.
+- Their combination can uniquely identify an employee-project assignment.
+- If multiple roles per employee-project combination are allowed, the role can be included in the composite key.
+- Another design option is to use a separate ID and enforce uniqueness with a UNIQUE constraint.
+
+### 6. Foreign Key Deletion Strategies
+
+Learned how foreign-key relationships affect deletion.
+
+| Strategy | Behaviour |
+|---|---|
+| RESTRICT | Prevents deletion while dependent records exist. |
+| CASCADE | Automatically deletes dependent records. |
+| SET NULL | Sets the referencing foreign key to NULL. |
+
+Example:
+
+```sql
+CREATE TABLE expenses (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(100),
+    user_id INTEGER REFERENCES users(id)
+        ON DELETE CASCADE
+);
+```
+
+`SET NULL` requires the foreign-key column to allow NULL values.
+
+PostgreSQL's default foreign-key deletion behaviour is NO ACTION.
+
+### 7. SQL CRUD Operations
+
+CRUD stands for Create, Read, Update and Delete.
+
+**INSERT — Create records**
+
+```sql
+INSERT INTO expenses (title, amount, category)
+VALUES ('Dinner', 350, 'Food');
+```
+
+Multiple records can be inserted in one statement:
+
+```sql
+INSERT INTO expenses (title, amount, category)
+VALUES
+    ('Dinner', 350, 'Food'),
+    ('Petrol', 600, 'Travel'),
+    ('Shopping', 1200, 'Personal');
+```
+
+**SELECT — Retrieve records**
+
+```sql
+SELECT * FROM expenses;
+
+SELECT title, amount
+FROM expenses;
+
+SELECT *
+FROM expenses
+WHERE category = 'Food';
+```
+
+**WHERE conditions**
+
+Practised comparison operators:
+
+- `=` : Equal to
+- `!=` : Not equal to
+- `>` : Greater than
+- `<` : Less than
+- `>=` : Greater than or equal to
+- `<=` : Less than or equal to
+
+Also practised combining conditions using `AND` and `OR`.
+
+Example:
+
+```sql
+SELECT *
+FROM expenses
+WHERE category = 'Food'
+AND amount > 300;
+```
+
+**UPDATE — Modify records**
+
+```sql
+UPDATE expenses
+SET amount = 400
+WHERE id = 1;
+```
+
+Updating amounts using existing values:
+
+```sql
+UPDATE expenses
+SET amount = amount * 1.10
+WHERE category = 'Travel';
+```
+
+Important: Always use an appropriate WHERE condition when updating specific records. Without WHERE, every row is updated.
+
+**DELETE — Remove records**
+
+```sql
+DELETE FROM expenses
+WHERE id = 3;
+```
+
+Delete records based on conditions:
+
+```sql
+DELETE FROM expenses
+WHERE amount <= 100;
+```
+
+Important: DELETE without WHERE removes all rows but keeps the table structure.
+
+### 8. Sorting and Pagination
+
+**ORDER BY**
+
+Sort records using ASC or DESC.
+
+```sql
+SELECT *
+FROM expenses
+ORDER BY amount DESC;
+```
+
+- `ASC`: Ascending order (default).
+- `DESC`: Descending order.
+
+**LIMIT**
+
+Restricts the number of returned records.
+
+```sql
+SELECT *
+FROM expenses
+ORDER BY amount DESC
+LIMIT 3;
+```
+
+**OFFSET**
+
+Skips a specified number of records.
+
+```sql
+SELECT *
+FROM expenses
+ORDER BY amount DESC
+LIMIT 1 OFFSET 1;
+```
+
+This retrieves the second-highest expense when amounts are distinct.
+
+Key distinction:
+
+- LIMIT controls how many records are returned.
+- OFFSET controls how many records are skipped.
+
+### 9. Aggregate Function: COUNT
+
+`COUNT(*)` returns the number of rows.
+
+```sql
+SELECT COUNT(*)
+FROM expenses;
+```
+
+Using an alias:
+
+```sql
+SELECT COUNT(*) AS total_expenses
+FROM expenses;
+```
+
+COUNT can also be combined with WHERE:
+
+```sql
+SELECT COUNT(*)
+FROM expenses
+WHERE category = 'Food';
+```
+
+### 10. Important Lessons
+
+- Primary keys uniquely identify records.
+- Foreign keys establish relationships between tables.
+- Foreign-key values can repeat.
+- Composite primary keys enforce uniqueness across a combination of columns.
+- SQL CRUD operations are fundamental to database interaction.
+- WHERE conditions control which records are affected.
+- ORDER BY determines sorting direction.
+- LIMIT and OFFSET support pagination.
+- PostgreSQL string comparisons using ordinary equality are case-sensitive.
+- DELETE and TRUNCATE both remove rows, but serve different purposes.
+
 ### Progress
 
-- [x] Day 14: Pydantic validators, validation errors, pytest, and regex fundamentals
+- [x] Day 15: Database fundamentals, primary and foreign keys, composite keys, referential actions, and SQL CRUD operations.
 
 ### Next Step
 
-Continue with database fundamentals and SQL, followed by database integration with FastAPI.
+Continue with PostgreSQL integration with FastAPI, replacing the existing in-memory expense storage with persistent database storage.

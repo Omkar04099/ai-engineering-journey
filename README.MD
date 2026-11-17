@@ -17,9 +17,10 @@
 - [x] Day 12: HTTP methods, status codes, Pydantic request and response models
 - [x] Day 13: Implementing CRUD operations, HTTP exceptions, and stable ID generation
 - [x] Day 14: Pydantic validators, validation errors, pytest, and regex fundamentals
-- [ ] Database fundamentals and SQL
-- [ ] Database integration with FastAPI
+- [x] Day 15: Database fundamentals, SQL, primary and foreign keys, and CRUD queries
+- [ ] Day 16: PostgreSQL integration with FastAPI
 - [ ] PostgreSQL and ORM integration
+
 
 ## FastAPI Learning Project
 
@@ -59,6 +60,17 @@ Built an Expense Management REST API using FastAPI and Pydantic.
 - Python regular expressions using the `re` module
 - Regex character classes, quantifiers, grouping, and alternation
 - Indian numbering-system comma grouping validation
+- Relational database fundamentals
+- SQL tables, rows, and columns
+- Primary keys and foreign keys
+- Composite primary keys
+- Foreign key constraints and referential integrity
+- ON DELETE CASCADE, RESTRICT, and SET NULL
+- SQL INSERT, SELECT, UPDATE, and DELETE
+- WHERE conditions with AND and OR
+- ORDER BY, ASC, and DESC
+- LIMIT and OFFSET
+- COUNT() aggregate function
 
 ### Current Limitations
 
