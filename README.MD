@@ -11,15 +11,17 @@
 - [x] Day 9: Temporary files and testing practices
 - [x] Day 10: Numeric validation and integration testing
 
-### Phase 2: FastAPI and Backend Development
+## Phase 2: FastAPI and Backend Development
 
 - [x] Day 11: Introduction to FastAPI and building the first API
 - [x] Day 12: HTTP methods, status codes, Pydantic request and response models
 - [x] Day 13: Implementing CRUD operations, HTTP exceptions, and stable ID generation
 - [x] Day 14: Pydantic validators, validation errors, pytest, and regex fundamentals
 - [x] Day 15: Database fundamentals, SQL, primary and foreign keys, and CRUD queries
-- [ ] Day 16: PostgreSQL integration with FastAPI
-- [ ] PostgreSQL and ORM integration
+- [ ] Day 16: PostgreSQL setup, table creation, constraints, Psycopg connections, and parameterized queries
+- [ ] PostgreSQL transaction handling and complete CRUD integration
+- [ ] FastAPI and PostgreSQL integration
+- [ ] ORM integration
 
 
 ## FastAPI Learning Project
@@ -71,6 +73,22 @@ Built an Expense Management REST API using FastAPI and Pydantic.
 - ORDER BY, ASC, and DESC
 - LIMIT and OFFSET
 - COUNT() aggregate function
+- PostgreSQL database and table setup
+- SQL DDL and DML
+- PostgreSQL data types: INTEGER, VARCHAR, NUMERIC, and SERIAL
+- PRIMARY KEY, NOT NULL, CHECK, and DEFAULT constraints
+- PostgreSQL sequences and nextval()
+- Inspecting table metadata using information_schema
+- Psycopg 3 installation and database connectivity
+- Database connections and cursors
+- Executing SQL queries using cursor.execute()
+- Retrieving records using fetchone() and fetchall()
+- PostgreSQL NUMERIC and Python Decimal
+- Environment variable management using .env and python-dotenv
+- Reading environment variables using os.getenv()
+- Parameterized SQL queries using %s placeholders
+- SQL injection risks and prevention
+- Database transactions and connection.commit()
 
 ### Current Limitations
 
@@ -85,7 +103,24 @@ This means:
 - Decimal currency input and currency-symbol handling still need
   complete integration and testing.
 
-The next stage will introduce databases and persistent storage.
+PostgreSQL learning and database setup have started separately from the FastAPI application.
+
+Current database progress:
+- Created a local PostgreSQL database named `expense_tracker_db`.
+- Created a `products` table with appropriate data types and constraints.
+- Practised inserting and retrieving records using pgAdmin.
+- Established Python-to-PostgreSQL connectivity using Psycopg 3.
+- Executed SELECT and parameterized INSERT queries from Python.
+- Practised committing database transactions.
+
+Remaining work:
+- Implement transaction error handling and rollback.
+- Complete INSERT, SELECT, UPDATE, and DELETE operations using Psycopg.
+- Integrate PostgreSQL with the FastAPI Expense API.
+- Replace in-memory storage with persistent database storage.
+- Explore ORM integration after understanding direct SQL operations.
+
+
 
 ## Learning Philosophy
 

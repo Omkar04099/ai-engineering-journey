@@ -1073,23 +1073,419 @@ FROM expenses
 WHERE category = 'Food';
 ```
 
-### 10. Important Lessons
+# Day 16: PostgreSQL Fundamentals and Python Integration Using Psycopg
 
-- Primary keys uniquely identify records.
-- Foreign keys establish relationships between tables.
-- Foreign-key values can repeat.
-- Composite primary keys enforce uniqueness across a combination of columns.
-- SQL CRUD operations are fundamental to database interaction.
-- WHERE conditions control which records are affected.
-- ORDER BY determines sorting direction.
-- LIMIT and OFFSET support pagination.
-- PostgreSQL string comparisons using ordinary equality are case-sensitive.
-- DELETE and TRUNCATE both remove rows, but serve different purposes.
+## 1. Local PostgreSQL Setup
 
-### Progress
+Created a fresh local PostgreSQL database for the learning project.
 
-- [x] Day 15: Database fundamentals, primary and foreign keys, composite keys, referential actions, and SQL CRUD operations.
+- Database name: `expense_tracker_db`
+- PostgreSQL user: `postgres`
+- Host: `localhost`
+- Default PostgreSQL port: `5432`
 
-### Next Step
+Kept this database separate from the NexusAI project and its NeonDB configuration.
 
-Continue with PostgreSQL integration with FastAPI, replacing the existing in-memory expense storage with persistent database storage.
+## 2. Creating Tables Using DDL
+
+Learned the difference between:
+
+- **DDL (Data Definition Language):** Defines or changes database structure.
+- **DML (Data Manipulation Language):** Inserts, updates, and deletes table records.
+
+Common DDL commands:
+
+- `CREATE`: Creates database objects such as tables.
+- `ALTER`: Changes existing database structures.
+- `DROP`: Removes database objects.
+
+Created a `products` table:
+
+```sql
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    price NUMERIC(10, 2) NOT NULL CHECK (price > 0),
+    quantity INTEGER NOT NULL CHECK (quantity >= 0) DEFAULT 0
+);
+```
+
+## 3. SQL Data Types and Constraints
+
+### Data types practised
+
+| Data type | Purpose |
+|---|---|
+| INTEGER | Whole numbers |
+| VARCHAR(100) | Text with a maximum of 100 characters |
+| NUMERIC(10, 2) | Exact decimal values with 2 fractional digits |
+| SERIAL | Auto-incrementing integer column backed by a sequence |
+
+### Constraints practised
+
+**PRIMARY KEY**
+
+- Uniquely identifies each record.
+- Does not allow duplicate values.
+- Does not allow NULL values.
+- A table has one primary key constraint, which can contain multiple columns.
+
+**NOT NULL**
+
+- Requires a value to be provided.
+- Allows valid values such as zero.
+- Does not independently enforce positive or non-negative values.
+
+**CHECK**
+
+Enforces a condition on column values.
+
+Examples:
+
+```sql
+CHECK (price > 0)
+CHECK (quantity >= 0)
+```
+
+**DEFAULT**
+
+Provides a value when a column is omitted from an INSERT statement.
+
+Example:
+
+```sql
+quantity INTEGER NOT NULL DEFAULT 0
+```
+
+Important distinction:
+
+- Omitting `quantity` applies its default value.
+- Explicitly inserting `NULL` violates `NOT NULL`.
+- `DEFAULT` can also be specified explicitly in an INSERT statement.
+
+Example:
+
+```sql
+INSERT INTO products (name, price, quantity)
+VALUES
+    ('Mechanical Keyboard', 2499.00, 5),
+    ('Wireless Mouse', 799.50, DEFAULT);
+```
+
+## 4. Inspecting Table Metadata
+
+Used PostgreSQL's `information_schema.columns` to inspect table definitions.
+
+```sql
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'products';
+```
+
+Observed:
+
+- `SERIAL` is represented as an integer column with a sequence-based default (`nextval(...)`).
+- Primary keys are automatically non-nullable.
+- `NOT NULL` columns report `is_nullable = NO`.
+- The quantity column reports its default as `0`.
+
+Learned that PostgreSQL uses sequences to generate successive values for SERIAL columns.
+
+## 5. Python Environment Configuration Using .env
+
+Created a `.env` file to separate database configuration from application code.
+
+Example:
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=expense_tracker_db
+DB_USER=postgres
+DB_PASSWORD=your_actual_password
+```
+
+Installed the `python-dotenv` package:
+
+```bash
+python -m pip install python-dotenv
+```
+
+### Loading environment variables
+
+```python
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+password = os.getenv("DB_PASSWORD")
+db_host = os.getenv("DB_HOST")
+db_name = os.getenv("DB_NAME")
+db_port = os.getenv("DB_PORT")
+db_user = os.getenv("DB_USER")
+```
+
+Important concepts:
+
+- `.env` is a plain-text configuration file.
+- Python does not automatically load `.env` files.
+- `load_dotenv()` reads the file and loads its variables into the process environment.
+- `os.getenv()` retrieves an environment variable.
+- `os.getenv()` returns `None` when the requested variable is missing and no fallback is supplied.
+- Environment variables are returned as strings by `os.getenv()`.
+
+Added `.env` to `.gitignore` to prevent database credentials from being committed to GitHub.
+
+A `.env.example` file can be committed with placeholder values.
+
+## 6. Connecting Python to PostgreSQL Using Psycopg
+
+Installed Psycopg 3:
+
+```bash
+python -m pip install "psycopg[binary]"
+```
+
+### Establishing a connection
+
+```python
+import psycopg
+
+connection = psycopg.connect(
+    host=db_host,
+    port=db_port,
+    dbname=db_name,
+    user=db_user,
+    password=password
+)
+```
+
+Important concepts:
+
+- `psycopg.connect()` establishes a connection with PostgreSQL.
+- It returns a connection object when successful.
+- It raises an exception if the connection fails.
+- `dbname` is the parameter expected by Psycopg for the database name.
+
+### Connection object vs Cursor object
+
+**Connection object**
+
+- Establishes and manages communication with PostgreSQL.
+- Provides access to cursor creation and transaction management.
+
+**Cursor object**
+
+- Executes SQL statements through the connection.
+- Retrieves query results.
+
+Create a cursor:
+
+```python
+cursor = connection.cursor()
+```
+
+## 7. Executing SQL and Retrieving Records
+
+### cursor.execute()
+
+Executes an SQL statement.
+
+```python
+cursor.execute("SELECT * FROM products")
+```
+
+### cursor.fetchone()
+
+Retrieves one available row.
+
+```python
+product = cursor.fetchone()
+```
+
+Returns `None` when no rows remain.
+
+### cursor.fetchall()
+
+Retrieves all remaining rows.
+
+```python
+products = cursor.fetchall()
+```
+
+Important: The cursor maintains its position in the result set. Calling `fetchone()` consumes a row, so a subsequent `fetchall()` returns only the remaining rows.
+
+### Psycopg's default row structure
+
+Psycopg returns rows as tuples by default.
+
+Example:
+
+```python
+(
+    1,
+    'Mechanical Keyboard',
+    Decimal('2499.00'),
+    5
+)
+```
+
+For a list of tuples:
+
+```python
+products[0][1]  # First product name
+products[1][2]  # Second product price
+```
+
+The first index identifies the row, and the second identifies the column position.
+
+Dictionary-style rows are also possible, but tuples are sufficient for the current learning exercise.
+
+## 8. PostgreSQL NUMERIC and Python Decimal
+
+Our PostgreSQL price column uses:
+
+```sql
+NUMERIC(10, 2)
+```
+
+Psycopg maps PostgreSQL NUMERIC values to Python's `Decimal` type by default.
+
+Why this matters:
+
+- `NUMERIC` supports exact decimal storage.
+- Python `float` uses binary floating-point representation and can introduce precision differences.
+- Python `Decimal` is useful for financial calculations requiring controlled decimal precision.
+
+Example:
+
+```python
+0.1 + 0.2
+# 0.30000000000000004
+```
+
+## 9. Parameterized SQL Queries
+
+Learned why SQL queries should not be constructed by directly interpolating untrusted user input.
+
+### Unsafe approach
+
+```python
+query = f"""
+INSERT INTO products (name, price, quantity)
+VALUES ('{product_name}', {product_price}, {product_quantity})
+"""
+```
+
+Direct string interpolation can introduce SQL injection vulnerabilities.
+
+### Safe approach: Parameterized queries
+
+Psycopg uses `%s` placeholders for parameter binding.
+
+```python
+query = """
+INSERT INTO products (name, price, quantity)
+VALUES (%s, %s, %s)
+"""
+
+cursor.execute(
+    query,
+    (product_name, product_price, product_quantity)
+)
+```
+
+Important points:
+
+- SQL structure and input values are supplied separately.
+- The second argument is a tuple of parameter values.
+- Placeholder order must match the supplied parameter order.
+- `%s` is used for strings, integers, and decimal values.
+- Do not put quotes around `%s` placeholders.
+- Psycopg safely binds the values rather than treating them as SQL commands.
+
+Parameterized queries are an essential defence against SQL injection when handling user-provided values.
+
+## 10. Database Transactions and Commit
+
+Database operations such as INSERT are performed within transactions.
+
+A transaction represents a unit of database work that can be committed or rolled back.
+
+**Commit:**
+
+```python
+connection.commit()
+```
+
+Makes the transaction's changes permanent.
+
+**Rollback:**
+
+```python
+connection.rollback()
+```
+
+Cancels uncommitted changes in the current transaction.
+
+Learned that closing a connection with an uncommitted transaction causes PostgreSQL to roll back that transaction.
+
+The practical INSERT operation used:
+
+```python
+cursor.execute(query, values)
+connection.commit()
+```
+
+## 11. Practical Implementation and Results
+
+Successfully completed the following exercises:
+
+- Created a fresh local PostgreSQL database.
+- Created a `products` table with a SERIAL primary key.
+- Applied NOT NULL, CHECK, and DEFAULT constraints.
+- Inserted products using pgAdmin.
+- Retrieved records using SQL SELECT.
+- Inspected table metadata.
+- Configured database credentials using `.env`.
+- Loaded environment variables using `python-dotenv`.
+- Established a Python-to-PostgreSQL connection using Psycopg.
+- Created a cursor and executed SELECT.
+- Retrieved records using `fetchall()`.
+- Successfully inserted a product using a parameterized query.
+- Committed the INSERT transaction.
+- Verified the inserted record in pgAdmin.
+
+Example product inserted through Python:
+
+```python
+product_name = "Wireless Headphones"
+product_price = 1999.50
+product_quantity = 5
+```
+
+The insertion completed successfully and the record was visible in PostgreSQL.
+
+## 12. Pending Topics
+
+The following topics are not yet completed:
+
+- Transaction error handling using `try` and `except`.
+- Understanding failed transaction states.
+- Using `connection.rollback()` after failures.
+- UPDATE operations through Psycopg.
+- DELETE operations through Psycopg.
+- More robust cursor and connection lifecycle management.
+- Integrating PostgreSQL with FastAPI.
+- Replacing the Expense API's in-memory storage with persistent database storage.
+- ORM integration.
+
+## Progress
+
+- [x] Day 16: Local PostgreSQL setup, table creation, constraints, Psycopg connection, SELECT, parameterized INSERT, and transaction commit.
+- [ ] Complete Psycopg CRUD and transaction error handling.
+- [ ] Integrate PostgreSQL with FastAPI.
+- [ ] Learn ORM integration.
+
+**Next session:** Continue with database transaction failures, `try`/`except`, and `connection.rollback()` before implementing the remaining CRUD operations.
