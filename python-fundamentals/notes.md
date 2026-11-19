@@ -1467,25 +1467,510 @@ product_quantity = 5
 
 The insertion completed successfully and the record was visible in PostgreSQL.
 
-## 12. Pending Topics
+# Day 17: PostgreSQL Transactions, Psycopg CRUD, Context Managers, and Project Structure
 
-The following topics are not yet completed:
+## 1. Database Transaction Error Handling
 
-- Transaction error handling using `try` and `except`.
-- Understanding failed transaction states.
-- Using `connection.rollback()` after failures.
-- UPDATE operations through Psycopg.
-- DELETE operations through Psycopg.
-- More robust cursor and connection lifecycle management.
-- Integrating PostgreSQL with FastAPI.
-- Replacing the Expense API's in-memory storage with persistent database storage.
-- ORM integration.
+Learned how to handle database errors using Python exception handling and Psycopg.
 
-## Progress
+### try, except, else, and finally
 
-- [x] Day 16: Local PostgreSQL setup, table creation, constraints, Psycopg connection, SELECT, parameterized INSERT, and transaction commit.
-- [ ] Complete Psycopg CRUD and transaction error handling.
-- [ ] Integrate PostgreSQL with FastAPI.
+- `try`: Contains code that might raise an exception.
+- `except`: Handles matching exceptions raised inside the `try` block.
+- `else`: Executes only when the `try` block completes without an exception.
+- `finally`: Executes whether an exception occurs or not; commonly used for resource cleanup.
+
+### Handling Psycopg errors
+
+Practised catching database exceptions using `psycopg.Error`.
+
+```python
+try:
+    cursor.execute(query, parameters)
+    connection.commit()
+
+except psycopg.Error as error:
+    print("Database error:", error)
+    connection.rollback()
+
+finally:
+    cursor.close()
+    connection.close()
+```
+
+Important concepts:
+
+- `psycopg.Error` catches database-related exceptions raised by Psycopg.
+- If `cursor.execute()` fails, execution moves to the matching `except` block.
+- If `connection.commit()` is inside the `try` block, commit errors matching the exception handler can also be caught.
+- An exception raised inside `else` is not caught by the preceding `except`.
+- `finally` is useful for ensuring resource cleanup.
+- Rollback is an attempt to cancel uncommitted changes after a transaction failure.
+
+## 2. Understanding Transaction Boundaries
+
+Learned how multiple SQL operations behave inside a transaction.
+
+### Example: Multiple INSERT operations in one transaction
+
+```python
+try:
+    cursor.execute(query_a, parameters_a)
+    cursor.execute(query_b, parameters_b)
+
+    connection.commit()
+
+except psycopg.Error as error:
+    print("Database error:", error)
+    connection.rollback()
+```
+
+If the first INSERT succeeds but the second INSERT fails:
+
+- The first INSERT has executed but is not committed.
+- The second INSERT fails.
+- Execution moves to the exception handler.
+- `rollback()` cancels both uncommitted INSERT operations.
+
+### Separate transactions
+
+If Product A is inserted and committed in one transaction, and Product B is inserted in another transaction:
+
+- Product A remains saved after its successful commit.
+- If Product B fails, rolling back its transaction does not undo Product A.
+
+### Key takeaway
+
+A transaction groups database operations into a unit of work.
+
+The atomicity principle means that a transaction's changes are committed together or rolled back together.
+
+## 3. PostgreSQL Sequence Behaviour
+
+Observed that PostgreSQL SERIAL-generated IDs can have gaps.
+
+Example:
+
+- A failed INSERT attempted to use ID 5.
+- The transaction was rolled back.
+- The next generated ID did not necessarily reuse 5.
+
+Important:
+
+- PostgreSQL sequences are not rolled back with the transaction.
+- Deleting a record also does not reset the sequence.
+- Consecutive IDs are not guaranteed.
+- ID gaps are normal and should not be treated as errors.
+
+## 4. SELECT Operations Using Psycopg
+
+Learned to retrieve an individual product using a parameterized SELECT query.
+
+```python
+def get_product_by_id(cursor, product_id):
+    query = """
+    SELECT * FROM products
+    WHERE id = %s
+    """
+
+    cursor.execute(query, (product_id,))
+    product = cursor.fetchone()
+
+    return product
+```
+
+### Handling missing records
+
+- `fetchone()` returns a tuple when a matching record exists.
+- `fetchone()` returns `None` when no matching record exists.
+- A missing record does not raise a database exception.
+
+Practised returning `None` from the database function and allowing the calling code to decide how to display a missing-record message.
+
+## 5. UPDATE Operations Using Psycopg
+
+Practised updating a product's price using a parameterized query.
+
+```python
+query = """
+UPDATE products
+SET price = %s
+WHERE id = %s
+"""
+
+cursor.execute(query, (new_price, product_id))
+affected_rows = cursor.rowcount
+```
+
+### Understanding cursor.rowcount
+
+`cursor.rowcount` reports the number of rows affected by the last executed query.
+
+| Result | Meaning |
+|---|---|
+| 1 | One matching row was updated |
+| 0 | No matching row was updated |
+
+Important:
+
+- UPDATE does not raise an exception just because the specified ID does not exist.
+- A valid UPDATE query can execute successfully while affecting zero rows.
+- Use `rowcount` to detect whether a matching record was updated.
+- Database constraint violations, such as a negative price when `CHECK (price > 0)` exists, raise database errors.
+
+### Parameter order lesson
+
+For this query:
+
+```python
+UPDATE products
+SET price = %s
+WHERE id = %s
+```
+
+The correct parameter order is:
+
+```python
+cursor.execute(query, (new_price, product_id))
+```
+
+The order of values must match the order of SQL placeholders.
+
+A mismatch can cause the query to execute against unintended values or affect zero rows without raising an exception.
+
+## 6. DELETE Operations Using Psycopg
+
+Practised deleting products using a parameterized query.
+
+```python
+query = """
+DELETE FROM products
+WHERE id = %s
+"""
+
+cursor.execute(query, (product_id,))
+affected_rows = cursor.rowcount
+```
+
+Important concepts:
+
+- `rowcount == 1` means one record was deleted.
+- `rowcount == 0` means no matching record was found.
+- DELETE does not raise an exception simply because the specified ID does not exist.
+- A DELETE query without a WHERE condition removes all records from the table.
+- Capture `rowcount` immediately after executing the query.
+
+## 7. Psycopg Context Managers
+
+Learned how Python's `with` statement simplifies resource management.
+
+### Cursor context manager
+
+Previously:
+
+```python
+cursor = connection.cursor()
+
+try:
+    cursor.execute(query, parameters)
+    product = cursor.fetchone()
+
+finally:
+    cursor.close()
+```
+
+Using a context manager:
+
+```python
+with connection.cursor() as cursor:
+    cursor.execute(query, parameters)
+    product = cursor.fetchone()
+```
+
+Important:
+
+- Creates a cursor for the block.
+- Automatically closes the cursor when the block exits.
+- Does not close the database connection.
+
+### Connection context manager
+
+Psycopg also supports connection context managers.
+
+```python
+with psycopg.connect(...) as connection:
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM products")
+        products = cursor.fetchall()
+```
+
+The connection context manager:
+
+- Commits the transaction when the block exits successfully.
+- Rolls back the transaction if an exception occurs.
+- Closes the connection when the block exits.
+
+The cursor context manager independently handles cursor cleanup.
+
+### Returning from inside a context manager
+
+A return statement inside a `with` block still triggers the context manager's exit and cleanup behaviour.
+
+## 8. Reusable Database Connection Function
+
+Initially, connection configuration was repeated in database functions.
+
+Created a reusable function:
+
+```python
+def get_connection():
+    return psycopg.connect(
+        host=db_host,
+        port=db_port,
+        user=db_user,
+        password=password,
+        dbname=db_name
+    )
+```
+
+Database functions can now obtain a connection using:
+
+```python
+with get_connection() as connection:
+    with connection.cursor() as cursor:
+        cursor.execute(query, parameters)
+```
+
+Benefits:
+
+- Avoids repeating connection configuration.
+- Centralizes database connection creation.
+- Makes database functions cleaner.
+- Simplifies future configuration changes.
+
+Environment variable values are read when the module executes the `os.getenv()` statements. Changes to `.env` during an already-running Python process do not automatically refresh those variables.
+
+## 9. Separating Database Modules and Packages
+
+Learned to organize database-related code into a dedicated Python package.
+
+### Project structure
+
+```text
+fastapi-learning/
+│
+├── database/
+│   ├── __init__.py
+│   ├── connection.py
+│   └── operations.py
+│
+├── test_db_connection.py
+├── .env
+└── .gitignore
+```
+
+### connection.py
+
+Responsibilities:
+
+- Import `load_dotenv`, `os`, and `psycopg`.
+- Load environment variables.
+- Read database configuration.
+- Provide the reusable `get_connection()` function.
+
+Implementation:
+
+```python
+from dotenv import load_dotenv
+import os
+import psycopg
+
+load_dotenv()
+
+db_host = os.getenv("DB_HOST")
+db_port = os.getenv("DB_PORT")
+db_name = os.getenv("DB_NAME")
+db_user = os.getenv("DB_USER")
+password = os.getenv("DB_PASSWORD")
+
+
+def get_connection():
+    return psycopg.connect(
+        host=db_host,
+        port=db_port,
+        dbname=db_name,
+        user=db_user,
+        password=password
+    )
+```
+
+### operations.py
+
+Responsibilities:
+
+- Import the reusable connection function.
+- Contain reusable database CRUD functions.
+- Keep SQL operations separate from connection configuration.
+
+Used a relative import:
+
+```python
+from .connection import get_connection
+```
+
+The dot indicates that the module is being imported from the same package.
+
+### __init__.py
+
+Learned that `__init__.py` traditionally identifies a regular Python package and can expose selected functions through package-level imports.
+
+Example:
+
+```python
+from .connection import get_connection
+from .operations import get_product_by_id
+from .operations import update_product_price
+from .operations import delete_product_by_id
+```
+
+Now functions can be imported directly from the package:
+
+```python
+from database import get_connection, get_product_by_id
+```
+
+This avoids specifying the individual module path for every exposed function.
+
+Modern Python also supports namespace packages without `__init__.py`; we are using an explicit regular package structure in this project.
+
+## 10. Database Operations Module
+
+Moved the database retrieval, update, and deletion functions into `database/operations.py`.
+
+### SELECT
+
+```python
+def get_product_by_id(product_id):
+    query = """
+    SELECT * FROM products
+    WHERE id = %s
+    """
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(query, (product_id,))
+            product = cursor.fetchone()
+            return product
+```
+
+### UPDATE
+
+```python
+def update_product_price(product_id, new_price):
+    query = """
+    UPDATE products
+    SET price = %s
+    WHERE id = %s
+    """
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(query, (new_price, product_id))
+            affected_rows = cursor.rowcount
+
+            if affected_rows == 0:
+                return f"Product not found for product_id: {product_id}"
+
+            return "Product Updated"
+```
+
+### DELETE
+
+```python
+def delete_product_by_id(product_id):
+    query = """
+    DELETE FROM products
+    WHERE id = %s
+    """
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(query, (product_id,))
+            affected_rows = cursor.rowcount
+
+            if affected_rows == 0:
+                return f"Product not found with product_id: {product_id}"
+
+            return "Product deleted successfully"
+```
+
+The connection context manager handles transaction commit or rollback and connection closure. The cursor context manager handles cursor closure.
+
+The INSERT operation was practised separately using a parameterized query and transaction commit. It has not yet been added to `operations.py`.
+
+## 11. Practical Results
+
+Successfully practised:
+
+- Triggering a database constraint violation using a negative product price.
+- Catching the error using `psycopg.Error`.
+- Rolling back an unsuccessful transaction.
+- Verifying that the failed product was not inserted.
+- Understanding transaction boundaries with multiple INSERT operations.
+- Retrieving existing and non-existing products.
+- Updating existing products.
+- Detecting missing products using `cursor.rowcount`.
+- Handling CHECK constraint violations during UPDATE.
+- Deleting existing products.
+- Handling deletion requests for non-existing IDs.
+- Using cursor and connection context managers.
+- Creating a reusable database connection function.
+- Moving database connection logic into `connection.py`.
+- Moving SELECT, UPDATE, and DELETE functions into `operations.py`.
+- Exposing functions through `database/__init__.py`.
+- Importing database functions using package-level imports.
+
+### Debugging lesson
+
+During UPDATE implementation, the parameter order did not match the SQL placeholder order.
+
+Incorrect:
+
+```python
+cursor.execute(query, (product_id, new_price))
+```
+
+Correct:
+
+```python
+cursor.execute(query, (new_price, product_id))
+```
+
+This demonstrated why checking SQL placeholder order and inspecting affected-row counts are important when debugging database operations.
+
+## 12. Current Progress and Pending Topics
+
+Completed:
+
+- [x] Local PostgreSQL setup and table creation.
+- [x] Database constraints and metadata inspection.
+- [x] Psycopg connection and parameterized INSERT.
+- [x] Transaction error handling and rollback.
+- [x] SELECT operations using Psycopg.
+- [x] UPDATE operations using Psycopg.
+- [x] DELETE operations using Psycopg.
+- [x] Cursor and connection context managers.
+- [x] Reusable database connection function.
+- [x] Database package and module organization.
+- [x] Package-level imports using `__init__.py`.
+
+Pending:
+
+- [ ] Add INSERT to `database/operations.py`.
+- [ ] Complete and verify the reusable database CRUD module.
+- [ ] Add automated tests for database operations.
+- [ ] Integrate PostgreSQL with the FastAPI Expense API.
+- [ ] Replace in-memory storage with persistent database storage.
 - [ ] Learn ORM integration.
 
-**Next session:** Continue with database transaction failures, `try`/`except`, and `connection.rollback()` before implementing the remaining CRUD operations.
+**Next session:** Complete the INSERT function in `database/operations.py`, verify all CRUD operations, and begin preparing the database layer for FastAPI integration.

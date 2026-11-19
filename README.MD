@@ -18,8 +18,9 @@
 - [x] Day 13: Implementing CRUD operations, HTTP exceptions, and stable ID generation
 - [x] Day 14: Pydantic validators, validation errors, pytest, and regex fundamentals
 - [x] Day 15: Database fundamentals, SQL, primary and foreign keys, and CRUD queries
-- [ ] Day 16: PostgreSQL setup, table creation, constraints, Psycopg connections, and parameterized queries
-- [ ] PostgreSQL transaction handling and complete CRUD integration
+- [x] Day 16: PostgreSQL setup, table creation, constraints, Psycopg connections, and parameterized queries
+- [x] Day 17: PostgreSQL transactions, error handling, Psycopg CRUD operations, context managers, and database module organization
+- [ ] Complete database CRUD module with INSERT integration
 - [ ] FastAPI and PostgreSQL integration
 - [ ] ORM integration
 
@@ -89,6 +90,29 @@ Built an Expense Management REST API using FastAPI and Pydantic.
 - Parameterized SQL queries using %s placeholders
 - SQL injection risks and prevention
 - Database transactions and connection.commit()
+- PostgreSQL transaction lifecycle and transaction boundaries
+- Python try, except, else, and finally with database operations
+- Psycopg database exception handling using psycopg.Error
+- connection.rollback() and handling failed transactions
+- PostgreSQL transaction atomicity
+- Understanding why SERIAL sequence values can have gaps after failed inserts or deletions
+- Retrieving individual records using SELECT and WHERE
+- Handling missing records using fetchone() and None
+- Updating records using parameterized UPDATE queries
+- Deleting records using parameterized DELETE queries
+- Detecting affected records using cursor.rowcount
+- Understanding why UPDATE and DELETE can succeed while affecting zero rows
+- Psycopg cursor context managers
+- Psycopg connection context managers
+- Automatic transaction commit and rollback using connection context managers
+- Automatic cursor and connection lifecycle management
+- Creating reusable database connection functions
+- Python modules and packages for database organization
+- Relative imports within Python packages
+- Exposing package functions through __init__.py
+- Separating database connection logic from database operations
+- Single Responsibility Principle (SRP) and separation of concerns
+- Debugging parameterized SQL queries and matching placeholder order with parameter values
 
 ### Current Limitations
 
@@ -105,17 +129,30 @@ This means:
 
 PostgreSQL learning and database setup have started separately from the FastAPI application.
 
-Current database progress:
+PostgreSQL learning and database setup have started separately from the FastAPI application.
+
+**Current database progress:**
+
 - Created a local PostgreSQL database named `expense_tracker_db`.
 - Created a `products` table with appropriate data types and constraints.
 - Practised inserting and retrieving records using pgAdmin.
 - Established Python-to-PostgreSQL connectivity using Psycopg 3.
-- Executed SELECT and parameterized INSERT queries from Python.
-- Practised committing database transactions.
+- Configured database credentials using `.env` and `python-dotenv`.
+- Executed parameterized INSERT queries from Python.
+- Practised transaction commits, failed transactions, and rollback.
+- Implemented SELECT, UPDATE, and DELETE operations using Psycopg.
+- Used `fetchone()` and `cursor.rowcount` to handle retrieved and affected records.
+- Practised exception handling using `try`, `except`, and `finally`.
+- Used cursor and connection context managers for resource and transaction management.
+- Created a reusable database connection function.
+- Organized database code into a Python package containing `connection.py` and `operations.py`.
+- Used relative imports and package-level exports through `__init__.py`.
 
-Remaining work:
-- Implement transaction error handling and rollback.
-- Complete INSERT, SELECT, UPDATE, and DELETE operations using Psycopg.
+**Remaining work:**
+
+- Add the INSERT operation to `database/operations.py`.
+- Complete and verify the reusable database CRUD module.
+- Add automated tests for database operations.
 - Integrate PostgreSQL with the FastAPI Expense API.
 - Replace in-memory storage with persistent database storage.
 - Explore ORM integration after understanding direct SQL operations.
