@@ -16,7 +16,7 @@ def update_product_price(product_id,new_price):
             affected_rows = cursor.rowcount
             if affected_rows == 0:
                 return f"Product not found for product_id: {product_id}"
-            return "Product Updated"
+    return "Product Updated"
 
 def delete_product_by_id(product_id):
     query = """DELETE FROM products WHERE id = %s"""
@@ -26,4 +26,13 @@ def delete_product_by_id(product_id):
             affected_rows = cursor.rowcount
             if affected_rows == 0:
                 return f"Product not found with product_id: {product_id}"
-            return "Product deleted successfully"
+    return "Product deleted successfully"
+
+
+def create_product(product_name,product_price,product_quantity):
+    query = """INSERT INTO products (name, price, quantity) VALUES (%s, %s, %s) RETURNING id"""
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(query,(product_name,product_price,product_quantity))
+            product_id = cursor.fetchone()[0]
+    return product_id

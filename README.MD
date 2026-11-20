@@ -20,7 +20,7 @@
 - [x] Day 15: Database fundamentals, SQL, primary and foreign keys, and CRUD queries
 - [x] Day 16: PostgreSQL setup, table creation, constraints, Psycopg connections, and parameterized queries
 - [x] Day 17: PostgreSQL transactions, error handling, Psycopg CRUD operations, context managers, and database module organization
-- [ ] Complete database CRUD module with INSERT integration
+- [x] Day 18: Completing the reusable PostgreSQL CRUD module, generated ID retrieval, pytest database testing, and test cleanup
 - [ ] FastAPI and PostgreSQL integration
 - [ ] ORM integration
 
@@ -113,6 +113,29 @@ Built an Expense Management REST API using FastAPI and Pydantic.
 - Separating database connection logic from database operations
 - Single Responsibility Principle (SRP) and separation of concerns
 - Debugging parameterized SQL queries and matching placeholder order with parameter values
+### Additional Concepts Practised — Day 18
+
+- Completing reusable database CRUD operations using Psycopg
+- Implementing INSERT operations inside a reusable database module
+- PostgreSQL `RETURNING` clause
+- Retrieving automatically generated primary keys using `RETURNING id`
+- Fetching generated IDs using `cursor.fetchone()[0]`
+- Understanding why `RETURNING id` is safer than calculating IDs using `MAX(id) + 1`
+- Understanding transaction commit before returning successful operation results
+- Pytest test discovery and execution using `python -m pytest`
+- Pytest test file naming conventions: `test_*.py`
+- Organizing database tests in a separate `tests/` package
+- Arrange–Act–Assert (AAA) testing pattern
+- Positive testing and negative testing
+- Testing existing and non-existing database records
+- Verifying database operation results using assertions
+- Testing UPDATE operations with temporary database records
+- Database test isolation and repeatability
+- Using `try` and `finally` for test cleanup
+- Protecting cleanup operations when test data creation fails
+- Comparing PostgreSQL `NUMERIC` values using Python `Decimal`
+- Understanding Python import paths when running pytest
+- Using `python -m pytest` to execute tests from the project root
 
 ### Current Limitations
 
@@ -138,21 +161,30 @@ PostgreSQL learning and database setup have started separately from the FastAPI 
 - Practised inserting and retrieving records using pgAdmin.
 - Established Python-to-PostgreSQL connectivity using Psycopg 3.
 - Configured database credentials using `.env` and `python-dotenv`.
-- Executed parameterized INSERT queries from Python.
+- Executed parameterized SQL queries from Python.
 - Practised transaction commits, failed transactions, and rollback.
-- Implemented SELECT, UPDATE, and DELETE operations using Psycopg.
+- Implemented all four CRUD operations in `database/operations.py`:
+  - `create_product()`
+  - `get_product_by_id()`
+  - `update_product_price()`
+  - `delete_product_by_id()`
+- Used PostgreSQL `RETURNING id` to retrieve automatically generated product IDs.
 - Used `fetchone()` and `cursor.rowcount` to handle retrieved and affected records.
 - Practised exception handling using `try`, `except`, and `finally`.
 - Used cursor and connection context managers for resource and transaction management.
 - Created a reusable database connection function.
 - Organized database code into a Python package containing `connection.py` and `operations.py`.
 - Used relative imports and package-level exports through `__init__.py`.
+- Created a separate `tests/` package for database tests.
+- Added pytest tests for retrieving existing and non-existing products.
+- Added an UPDATE test using temporary product data and cleanup through `finally`.
+- Verified three database tests successfully.
 
 **Remaining work:**
 
-- Add the INSERT operation to `database/operations.py`.
-- Complete and verify the reusable database CRUD module.
-- Add automated tests for database operations.
+- Add automated tests for successful and failed product creation.
+- Add automated tests for successful deletion and deletion of non-existing records.
+- Improve database test isolation and reliability.
 - Integrate PostgreSQL with the FastAPI Expense API.
 - Replace in-memory storage with persistent database storage.
 - Explore ORM integration after understanding direct SQL operations.
