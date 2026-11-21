@@ -2280,34 +2280,102 @@ Successfully implemented and executed three database tests:
 - PostgreSQL `RETURNING id`.
 - Python `Decimal` comparisons.
 
-## 10. Current Progress and Pending Topics
 
-Completed:
+# Day 19: Pytest Fixtures and Database Test Cleanup
 
-- [x] Local PostgreSQL database and products table setup.
-- [x] Psycopg connectivity and parameterized SQL.
-- [x] Transaction handling and rollback.
-- [x] SELECT operation.
-- [x] UPDATE operation.
-- [x] DELETE operation.
-- [x] INSERT operation integrated into `database/operations.py`.
-- [x] Generated ID retrieval using `RETURNING id`.
-- [x] Reusable database CRUD module.
-- [x] Database package organization.
-- [x] Separate pytest test package.
-- [x] Test existing product retrieval.
-- [x] Test missing product retrieval.
-- [x] Test UPDATE operation with temporary data and cleanup.
+## 1. Completing Database CRUD Tests
 
-Pending:
+Completed automated tests for the reusable PostgreSQL CRUD functions in `database/operations.py`.
 
-- [ ] Test successful CREATE operation.
-- [ ] Test failed CREATE operation and constraint violation.
-- [ ] Test successful DELETE operation.
-- [ ] Test DELETE operation for a non-existing ID.
-- [ ] Improve database test isolation and reliability.
-- [ ] Integrate PostgreSQL with the FastAPI Expense API.
-- [ ] Replace in-memory storage with persistent database storage.
-- [ ] Learn ORM integration.
+The database test suite now covers:
 
-**Next session:** Continue automated database testing with CREATE and DELETE operations, then prepare the database layer for FastAPI integration.
+- Retrieving an existing product.
+- Handling a product ID that does not exist.
+- Updating a product’s price and verifying the stored value.
+- Creating a product and checking its generated ID and stored data.
+- Rejecting product creation that violates a database constraint.
+- Deleting a product and verifying that it no longer exists.
+- Handling deletion requests for a non-existing product.
+
+The tests use temporary product records where appropriate so they do not depend on or permanently modify existing development data.
+
+## 2. Pytest Fixtures
+
+A pytest fixture prepares resources or data that a test needs. A test requests a fixture by using the fixture’s name as a function parameter.
+
+Fixtures are useful for repeated setup and cleanup logic, such as creating a temporary database record before a test and deleting it afterward.
+
+### Fixture lifecycle
+
+A fixture can use `yield` to separate setup from teardown:
+
+1. Code before `yield` runs as setup.
+2. The value supplied to `yield` is passed to the test.
+3. The test body runs.
+4. Code after `yield` runs as teardown.
+
+If the test body fails after the fixture has yielded, pytest still resumes the fixture and runs its teardown. If fixture setup fails before reaching `yield`, the post-`yield` teardown does not run.
+
+### Temporary product fixture
+
+```python
+@pytest.fixture
+def temporary_product():
+    product_id = create_product("Laptop Charger", 450.69, 40)
+
+    yield product_id
+
+    delete_product_by_id(product_id)
+    assert get_product_by_id(product_id) is None
+
+
+def test_temporary_product_exist(temporary_product):
+    assert temporary_product is not None
+
+    product = get_product_by_id(temporary_product)
+
+    assert product is not None
+    assert product[1] == "Laptop Charger"
+```
+
+The fixture creates a product, provides its generated ID to the test, then deletes the product and verifies that it is gone.
+
+## 3. Fixture Scope and Test Isolation
+
+Pytest fixtures have scopes that determine how often setup runs and when teardown occurs.
+
+- `function` — once per test function; this is the default.
+- `class` — once per test class.
+- `module` — once per test module/file.
+- `session` — once per pytest run.
+
+For database tests that create or modify records, function scope is generally a good default because each test receives its own temporary record and cleanup runs after that test.
+
+Broader scopes can reduce repeated setup, but they can also introduce shared-state dependencies between tests. Tests should remain independently runnable and should not rely on another test having run first.
+
+## 4. Test Results
+
+Ran the database tests using:
+
+```bash
+python -m pytest -v tests/test_database.py
+```
+
+Result:
+
+```text
+8 passed
+```
+
+## 5. Key Takeaways
+
+- Fixtures centralize reusable test setup and teardown.
+- A fixture’s yielded value becomes the test’s parameter value.
+- Teardown after `yield` runs after the test body, including when the test fails.
+- Function-scoped fixtures help keep database tests isolated.
+- Tests should create and clean up their own temporary records.
+- A passing test suite is stronger when tests do not depend on execution order or shared data.
+
+## 6. Next Step
+
+Continue with the database testing foundation, then integrate the existing PostgreSQL database module into the FastAPI Expense API. Keep ORM integration for later, after direct SQL integration is understood.
