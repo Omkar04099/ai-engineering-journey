@@ -18,10 +18,11 @@
 - [x] Days 15–17: SQL, PostgreSQL setup, Psycopg connectivity, transactions, and reusable database operations
 - [x] Day 18: Completed PostgreSQL CRUD functions, generated ID retrieval, and initial database tests
 - [x] Day 19: Completed database CRUD tests and practised pytest fixtures, teardown, and test isolation
+- [x] Day 20: Rebuilt PostgreSQL-backed Products API CRUD routes from memory and reviewed request/response models, validation, and HTTP status codes
 - [ ] Integrate PostgreSQL with the FastAPI Expense API
 - [ ] Replace in-memory storage with persistent database storage
+- [ ] Add and verify API-level tests for database-backed endpoints
 - [ ] ORM integration
-
 ## Current Database Progress
 
 - Created the local PostgreSQL database `expense_tracker_db` and the `products` table.
@@ -36,6 +37,11 @@
 - Used temporary database records to avoid modifying existing development data.
 - Added a pytest fixture that creates a temporary product, provides its ID to a test, and removes the product during teardown.
 - Verified the database test suite: **8 passed**.
+- Recreated the Products API database operations and Pydantic models from memory.
+- Practised GET-all, GET-by-ID, POST, PATCH, and DELETE routes using the reusable Psycopg operations.
+- Reviewed request validation, `response_model`, `201 Created`, `204 No Content`, `404 Not Found`, and automatic `422` validation errors.
+- Reviewed route-to-database argument order and handling missing records with `cursor.rowcount`.
+- Reviewed the code in an online practice environment; the API was not run against PostgreSQL during this session.
 
 ## Remaining Work
 

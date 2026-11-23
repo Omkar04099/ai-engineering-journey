@@ -1,5 +1,7 @@
 from fastapi import FastAPI,status,HTTPException
 from pydantic import BaseModel, Field, field_validator
+from database import (get_product_by_id, get_all_products, create_product, update_product_price, delete_product_by_id)
+from decimal import Decimal
 
 class Product(BaseModel):
     name:str = Field(min_length=1)
@@ -51,6 +53,29 @@ class ExpenseUpdate(BaseModel):
     amount: float | None = Field(default=None,gt=0)
     category: str | None = None
 
+class ProductResponse(BaseModel):
+    id:int
+    name:str
+    price:Decimal
+    quantity:int
+
+class ProductCreate(BaseModel):
+    name:str = Field(min_length=1)
+    price:Decimal = Field(gt=0)
+    quantity:int = Field(gt=0)
+
+    @field_validator("name")
+    @classmethod
+    def validate_title(cls,value):
+        value = value.strip()
+        if not value:
+            raise ValueError("name cannot be empty")
+        return value
+
+class ProductPriceUpdate(BaseModel):
+    price:Decimal = Field(gt=0)
+
+
 expenses = []
 next_expense_id = 1
 
@@ -77,7 +102,7 @@ def get_expenses():
     return expenses
 
 @app.get("/expenses/{expense_id}",response_model=ExpenseResponse)
-def expense_response(expense_id:int):
+def expense_expense_by_id(expense_id:int):
     for expense in expenses:
         if expense["id"] == expense_id:
             return expense
@@ -140,37 +165,47 @@ def get_user(user_id:int):
         "message":"User details fetched successfully"
     }
 
-@app.get("/products/search")
-def search_products(keyword:str,category:str="all",limit:int=10):
-    return {
-        "keyword":keyword,
-        "category":category,
-        "limit":limit
-    }
 
-@app.get("/products/{product_id}")
+
+
+@app.get("/products/{product_id}",response_model=ProductResponse)
 def get_product(product_id:int):
-    return {
-        "product_id": product_id,
-        "product_name":"Laptop",
-        "price":55000
-    }
+    product = get_product_by_id(product_id)
+    if product is not None:
+        return product
+    raise HTTPException(
+        status_code = status.HTTP_404_NOT_FOUND,
+        detail = f"Product not found with id: {product_id}"
+    )
 
+@app.get("/products", response_model=list[ProductResponse])
+def get_products():
+    products = get_all_products()
+    return products
 
-@app.get("/products")
-def list_products(category:str, limit:int=10):
-    return {
-        "category":category,
-        "limit":limit,
-        "message":"Products fetched successfully"
-    }
+@app.post("/products/create", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
+def create_prod(product:ProductCreate):
+    product_id = create_product(product.name,product.price,product.quantity)
+    product_details = get_product_by_id(product_id)
+    return product_details
+    
 
-@app.post("/products/create")
-def create_product(product:Product):
-    return {
-        "name":product.name,
-        "price":product.price,
-        "quantity":product.quantity,
-        "in_stock":product.in_stock
-    }
+@app.patch("/products/{product_id}",response_model=ProductResponse)
+def update_product_p(product_id:int,product:ProductPriceUpdate):
+    is_product_updated = update_product_price(product_id,product.price)
+    if is_product_updated:
+        product_details = get_product_by_id(product_id)
+        return product_details
+    raise HTTPException(
+        status_code = status.HTTP_404_NOT_FOUND,
+        detail = f"Product not found for id: {product_id}"
+    )
 
+@app.delete("/products/{product_id}",status_code=status.HTTP_204_NO_CONTENT)
+def delete_product(product_id:int):
+    is_deleted = delete_product_by_id(product_id)
+    if not is_deleted:    
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = f"Product not found with id: {product_id}"
+        )

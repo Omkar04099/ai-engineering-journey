@@ -2367,15 +2367,26 @@ Result:
 8 passed
 ```
 
-## 5. Key Takeaways
+## Day 20: Rebuilding a PostgreSQL-backed FastAPI CRUD API
 
-- Fixtures centralize reusable test setup and teardown.
-- A fixture’s yielded value becomes the test’s parameter value.
-- Teardown after `yield` runs after the test body, including when the test fails.
-- Function-scoped fixtures help keep database tests isolated.
-- Tests should create and clean up their own temporary records.
-- A passing test suite is stronger when tests do not depend on execution order or shared data.
+### 1. Practice Goal
 
-## 6. Next Step
+Rebuilt the Products API from memory to strengthen recall of the database layer, Pydantic models, route definitions, and HTTP status handling.
 
-Continue with the database testing foundation, then integrate the existing PostgreSQL database module into the FastAPI Expense API. Keep ORM integration for later, after direct SQL integration is understood.
+This was a code-review exercise in an online practice environment. The API was not executed against PostgreSQL, so this session did not verify live integration behaviour.
+
+### 2. Database Operations
+
+Practised reusable Psycopg functions for:
+
+- Reading one product and returning a dictionary or `None`.
+- Reading all products and returning a list of dictionaries.
+- Creating a product with `INSERT ... RETURNING id`.
+- Updating a product and checking `cursor.rowcount`.
+- Deleting a product and checking `cursor.rowcount`.
+
+Important: SQL placeholders and the values passed to `cursor.execute()` must be in the same order.
+
+```python
+query = "UPDATE products SET price = %s WHERE id = %s"
+cursor.execute(query, (price, product_id))
