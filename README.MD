@@ -19,9 +19,8 @@
 - [x] Day 18: Completed PostgreSQL CRUD functions, generated ID retrieval, and initial database tests
 - [x] Day 19: Completed database CRUD tests and practised pytest fixtures, teardown, and test isolation
 - [x] Day 20: Rebuilt PostgreSQL-backed Products API CRUD routes from memory and reviewed request/response models, validation, and HTTP status codes
-- [ ] Integrate PostgreSQL with the FastAPI Expense API
-- [ ] Replace in-memory storage with persistent database storage
-- [ ] Add and verify API-level tests for database-backed endpoints
+- [x] Day 21: Integrated PostgreSQL with the FastAPI Expense API, replaced in-memory storage, and manually verified CRUD endpoints
+- [ ] Add automated API-level tests for database-backed endpoints
 - [ ] ORM integration
 ## Current Database Progress
 
@@ -41,13 +40,20 @@
 - Practised GET-all, GET-by-ID, POST, PATCH, and DELETE routes using the reusable Psycopg operations.
 - Reviewed request validation, `response_model`, `201 Created`, `204 No Content`, `404 Not Found`, and automatic `422` validation errors.
 - Reviewed route-to-database argument order and handling missing records with `cursor.rowcount`.
-- Reviewed the code in an online practice environment; the API was not run against PostgreSQL during this session.
+- Integrated the reusable PostgreSQL operations with the FastAPI Expense API.
+- Replaced the Expense API's in-memory list and ID counter with PostgreSQL persistence.
+- Implemented database-backed GET-all, GET-by-ID, POST, PUT, PATCH, and DELETE expense endpoints.
+- Used `model_dump(exclude_unset=True)` to update only fields supplied in PATCH requests.
+- Added PATCH validation for null values, blank titles/categories, positive amounts, and rupee-prefixed amount strings.
+- Used an allowlist for dynamic PATCH column names and parameterized SQL for values.
+- Handled empty PATCH requests with `400 Bad Request` and missing expense IDs with `404 Not Found`.
+- Verified the CRUD flow manually, including successful operations and expected error responses.
+- Renamed the mistakenly named PostgreSQL table to `expenses`.
 
 ## Remaining Work
 
-- Integrate the reusable PostgreSQL operations with the FastAPI Expense API.
-- Replace the API’s in-memory list and ID counter with persistent database operations.
-- Add and verify API-level tests for database-backed endpoints.
+- Add automated API-level tests for the database-backed Expense endpoints.
+- Improve API test isolation and cleanup.
 - Explore ORM integration after completing direct SQL integration.
 
 ## Day 19: Key Concepts Practised
@@ -59,6 +65,4 @@
 - Why tests should not depend on execution order
 - Running and verifying the database test suite with pytest
 
-## Next Session
-
-Begin integrating the existing PostgreSQL database layer with the FastAPI Expense API. Continue using direct SQL and Psycopg before introducing an ORM.
+**Next Session:** Begin automated API testing for the PostgreSQL-backed Expense API using pytest and FastAPI's TestClient. Start with one endpoint and build up the test coverage incrementally.

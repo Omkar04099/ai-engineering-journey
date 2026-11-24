@@ -2367,7 +2367,7 @@ Result:
 8 passed
 ```
 
-## Day 20: Rebuilding a PostgreSQL-backed FastAPI CRUD API
+# Day 20: Rebuilding a PostgreSQL-backed FastAPI CRUD API
 
 ### 1. Practice Goal
 
@@ -2390,3 +2390,60 @@ Important: SQL placeholders and the values passed to `cursor.execute()` must be 
 ```python
 query = "UPDATE products SET price = %s WHERE id = %s"
 cursor.execute(query, (price, product_id))
+```
+
+# Day 21: Integrating PostgreSQL with FastAPI
+
+## Goals
+- Replace the in-memory expense list with PostgreSQL storage.
+- Connect FastAPI endpoints to database operations.
+- Verify the Expense API's CRUD operations.
+
+## What I Learned
+- How to use PostgreSQL as the persistent data store for a FastAPI application.
+- How to separate database operations from route handlers.
+- How to use parameterized SQL queries to pass values safely.
+- How to use `RETURNING id` to retrieve the ID of a newly created record.
+- How to use `cursor.rowcount` to check whether an `UPDATE` or `DELETE` affected a record.
+- How to build a dynamic `UPDATE` query for PATCH requests using an allowlist of permitted fields.
+- How to use `model_dump(exclude_unset=True)` to retrieve only the fields supplied in a PATCH request.
+- How to return appropriate HTTP status codes for successful operations and missing records.
+
+## Implementation
+- Connected the FastAPI Expense API to PostgreSQL.
+- Replaced in-memory storage with database-backed CRUD operations.
+- Implemented database functions to:
+  - Retrieve all expenses.
+  - Retrieve an expense by ID.
+  - Create an expense.
+  - Replace an expense using PUT.
+  - Partially update an expense using PATCH.
+  - Delete an expense.
+- Manually tested the API endpoints and verified their responses.
+
+## Key Concepts
+
+### Parameterized SQL
+Used `%s` placeholders and passed values separately to `cursor.execute()` rather than inserting user input directly into SQL strings.
+
+### PATCH Updates
+Used `model_dump(exclude_unset=True)` to identify fields provided by the client. The database function updates only allowed fields.
+
+### Database Transactions
+Used the connection context manager to manage database operations and commit successful changes.
+
+### Error Handling
+- `404 Not Found` when an expense ID does not exist.
+- `400 Bad Request` when a PATCH request contains no fields to update.
+- `422 Unprocessable Entity` when request data fails validation.
+- `204 No Content` after a successful DELETE.
+
+## Challenges and Fixes
+- Corrected the table name from `exepenses` to `expenses`.
+- Removed the in-memory data store and connected the API to PostgreSQL.
+- Kept database functions separate from FastAPI route handlers to make the code easier to maintain.
+
+## Next Steps
+- Write automated API tests using `pytest` and FastAPI's `TestClient`.
+- Test successful requests, validation errors, and missing-resource responses.
+- Explore using an ORM after the API tests are in place.

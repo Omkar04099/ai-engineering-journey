@@ -1,47 +1,71 @@
 from .connection import get_connection
 from psycopg.rows import dict_row
 
-def get_all_products():
-    query = """SELECT * FROM products ORDER BY id DESC"""
+def get_all_expenses():
+    query = """SELECT id, title, amount, category FROM expenses ORDER BY id ASC"""
     with get_connection() as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(query)
-            products = cursor.fetchall()
-            return products
+            expense_list = cursor.fetchall()
+    return expense_list
 
-def get_product_by_id(product_id):
-    query = """SELECT * FROM products WHERE id = %s"""
+def get_expense_by_id(expense_id):
+    query = """SELECT id, title, amount, category FROM expenses WHERE id = %s"""
     with get_connection() as connection:
-        with connection.cursor(row_factory = dict_row) as cursor:
-            cursor.execute(query,(product_id,))
-            product = cursor.fetchone()
-            return product
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(query,(expense_id,))
+            expense = cursor.fetchone()
+    return expense
 
-def update_product_price(product_id,new_price):
-    query = """UPDATE products SET price = %s WHERE id = %s"""
+def create_expense(expense_title,expense_amount,expense_category):
+    query = """INSERT INTO expenses (title, amount, category) VALUES (%s, %s, %s) RETURNING id"""
     with get_connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute(query,(new_price,product_id))
+            cursor.execute(query,(expense_title, expense_amount, expense_category))
+            expense_id = cursor.fetchone()[0]
+            return expense_id
+
+def update_expense(expense_id,expense_title,expense_amount,expense_category):
+    query = """UPDATE expenses SET title = %s, amount = %s, category = %s WHERE id = %s"""
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(query,(expense_title,expense_amount,expense_category,expense_id))
             affected_rows = cursor.rowcount
-            if affected_rows == 0:
-                return False
-    return True
+            if affected_rows > 0:
+                return True
+            return False
 
-def delete_product_by_id(product_id):
-    query = """DELETE FROM products WHERE id = %s"""
+def patch_expense(expense_id, updates):
+    if not updates:
+        return False
+
+    allowed_fields = {"title", "amount", "category"}
+    for key in updates:
+        if key not in allowed_fields:
+            return False
+
+    assignments = []
+    values = []
+
+    for key in updates:
+        assignments.append(f"{key} = %s")
+        values.append(updates[key])
+
+    set_clause = ", ".join(assignments)
+    query_values = tuple(values) + (expense_id,)
+
+    query = f"UPDATE expenses SET {set_clause} WHERE id = %s"
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute(query,(product_id,))
-            affected_rows = cursor.rowcount
-            if affected_rows == 0:
-                return False
-    return True
+            cursor.execute(query, query_values)
+            return cursor.rowcount > 0
 
 
-def create_product(product_name,product_price,product_quantity):
-    query = """INSERT INTO products (name, price, quantity) VALUES (%s, %s, %s) RETURNING id"""
+
+def delete_expense(expense_id):
+    query = """DELETE FROM expenses WHERE id = %s"""
     with get_connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute(query,(product_name,product_price,product_quantity))
-            product_id = cursor.fetchone()[0]
-    return product_id
+            cursor.execute(query,(expense_id,))
+            return cursor.rowcount > 0
