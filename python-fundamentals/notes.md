@@ -2443,7 +2443,160 @@ Used the connection context manager to manage database operations and commit suc
 - Removed the in-memory data store and connected the API to PostgreSQL.
 - Kept database functions separate from FastAPI route handlers to make the code easier to maintain.
 
-## Next Steps
-- Write automated API tests using `pytest` and FastAPI's `TestClient`.
-- Test successful requests, validation errors, and missing-resource responses.
-- Explore using an ORM after the API tests are in place.
+
+# Day 22 — Automated API Testing with pytest and FastAPI TestClient
+
+## 1. Learning Objectives
+
+- Test FastAPI endpoints automatically using `pytest`.
+- Send requests to the API using FastAPI’s `TestClient`.
+- Keep test data separate from development data.
+- Use fixtures to prepare and clean up test data.
+- Use `monkeypatch` to replace the database connection during tests.
+- Verify successful responses and expected error responses.
+
+## 2. FastAPI TestClient
+
+`TestClient` lets us call FastAPI endpoints directly from our tests without starting a separate server.
+
+```python
+from fastapi.testclient import TestClient
+from main import app
+
+client = TestClient(app)
+```
+
+A test can make a request and inspect the response:
+
+```python
+def test_get_expenses():
+    response = client.get("/expenses")
+
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+```
+
+Useful response properties:
+
+- `response.status_code` — the HTTP status code.
+- `response.json()` — the response body parsed as Python data.
+
+## 3. Use a Separate Test Database
+
+Tests should not modify the development database or real application data.
+
+A separate database was created for testing:
+
+```env
+DB_TEST_NAME=expense_test
+```
+
+The test database connection uses its own configuration. This keeps test data isolated from the development database.
+
+## 4. Replacing the Database Connection with `monkeypatch`
+
+`monkeypatch` is a pytest feature that temporarily replaces an object or function during a test.
+
+In our tests, we replace the database connection used by the operations module with the test database connection:
+
+```python
+monkeypatch.setattr(
+    operations,
+    "get_connection",
+    get_test_connection
+)
+```
+
+This means database operations performed during the test use the test database instead of the development database.
+
+The replacement applies during the test and is automatically undone by pytest afterward.
+
+## 5. Pytest Fixtures
+
+A fixture prepares the resources that a test needs.
+
+Our fixture:
+
+1. Uses the test database connection.
+2. Creates test expenses.
+3. Provides their IDs to the test.
+4. Deletes the test expenses after the test finishes.
+
+A fixture can provide its result to a test through its function argument:
+
+```python
+def test_get_expense_by_id(test_expenses):
+    ...
+```
+
+Here, `test_expenses` is the fixture name. Pytest runs the fixture and passes its returned value into the test.
+
+The fixture uses `yield` to separate setup from cleanup:
+
+- Code before `yield` prepares the test data.
+- The yielded value is made available to the test.
+- Code after `yield` runs during cleanup.
+
+## 6. Tests Implemented
+
+The test suite covers the following API behavior:
+
+### GET endpoints
+
+- Retrieve all expenses.
+- Retrieve an expense by ID.
+
+### POST endpoint
+
+- Create an expense successfully.
+- Reject an invalid amount.
+- Reject an invalid title.
+- Reject an invalid category.
+
+### DELETE endpoint
+
+- Delete an expense successfully.
+- Return `404` when trying to delete an expense that does not exist.
+- Return `422` when the path parameter is not an integer.
+
+### PATCH endpoint
+
+- Update an expense successfully.
+- Return `400` when the request body contains no fields to update.
+- Return `404` when the requested expense does not exist.
+- Return `422` when the path parameter is not an integer.
+
+## 7. Important HTTP Status Codes
+
+| Status code | Meaning | Example from our API |
+|---|---|---|
+| `200` | OK | A request succeeds |
+| `201` | Created | An expense is created |
+| `400` | Bad Request | PATCH request contains no fields to update |
+| `404` | Not Found | Expense ID does not exist |
+| `422` | Unprocessable Content | Path parameter or request data fails validation |
+
+A `404` means the requested resource was not found. A `422` means the request could not pass validation.
+
+## 8. Test Results
+
+The automated test suite completed successfully:
+
+```text
+11 passed
+```
+
+The tests verify both successful API behavior and expected error responses.
+
+## 9. Key Takeaways
+
+- `TestClient` allows API endpoints to be tested without running a separate server.
+- Tests should use a separate database to avoid changing development data.
+- `monkeypatch` temporarily replaces the database connection used by the application.
+- Fixtures help organize test setup and cleanup.
+- Tests should verify status codes and response data, not just whether a request completes.
+- Testing error cases is important because APIs must handle invalid input and missing resources predictably.
+
+## 10. Next Step
+
+Review the test fixture’s cleanup behavior, especially what happens if a test fails before reaching its assertions. Then continue improving the automated test suite.

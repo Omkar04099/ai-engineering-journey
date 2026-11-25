@@ -7,6 +7,7 @@ load_dotenv()
 db_host = os.getenv("DB_HOST")
 db_port = os.getenv("DB_PORT")
 db_name = os.getenv("DB_NAME")
+db_test_name = os.getenv("DB_TEST_NAME")
 db_user = os.getenv("DB_USER")
 password = os.getenv("DB_PASSWORD")
 
@@ -17,4 +18,13 @@ def get_connection():
         dbname = db_name,
         user = db_user,
         password = password
+    )
+
+def get_test_connection():
+    return psycopg.connect(
+        host = db_host,
+        port = db_port,
+        user = db_user,
+        password = password,
+        dbname = db_test_name
     )

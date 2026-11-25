@@ -20,8 +20,11 @@
 - [x] Day 19: Completed database CRUD tests and practised pytest fixtures, teardown, and test isolation
 - [x] Day 20: Rebuilt PostgreSQL-backed Products API CRUD routes from memory and reviewed request/response models, validation, and HTTP status codes
 - [x] Day 21: Integrated PostgreSQL with the FastAPI Expense API, replaced in-memory storage, and manually verified CRUD endpoints
-- [ ] Add automated API-level tests for database-backed endpoints
+- [x] Day 22: Added API-level tests for database-backed Expense endpoints using pytest and FastAPI TestClient
+- [ ] Improve API test cleanup and isolation
 - [ ] ORM integration
+
+
 ## Current Database Progress
 
 - Created the local PostgreSQL database `expense_tracker_db` and the `products` table.
@@ -49,11 +52,15 @@
 - Handled empty PATCH requests with `400 Bad Request` and missing expense IDs with `404 Not Found`.
 - Verified the CRUD flow manually, including successful operations and expected error responses.
 - Renamed the mistakenly named PostgreSQL table to `expenses`.
+- Created a separate PostgreSQL test database for API-level tests.
+- Used pytest fixtures to create test expenses and clean them up after tests.
+- Used `monkeypatch` to redirect database operations to the test database during tests.
+- Tested FastAPI endpoints with `TestClient`, including successful CRUD operations, validation failures, missing resources, and invalid path parameters.
+- Verified the API test suite: **11 passed**.
 
 ## Remaining Work
 
-- Add automated API-level tests for the database-backed Expense endpoints.
-- Improve API test isolation and cleanup.
+- Improve API test cleanup and isolation, including reliable teardown when a test fails.
 - Explore ORM integration after completing direct SQL integration.
 
 ## Day 19: Key Concepts Practised
