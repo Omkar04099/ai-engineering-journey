@@ -21,7 +21,8 @@
 - [x] Day 20: Rebuilt PostgreSQL-backed Products API CRUD routes from memory and reviewed request/response models, validation, and HTTP status codes
 - [x] Day 21: Integrated PostgreSQL with the FastAPI Expense API, replaced in-memory storage, and manually verified CRUD endpoints
 - [x] Day 22: Added API-level tests for database-backed Expense endpoints using pytest and FastAPI TestClient
-- [ ] Improve API test cleanup and isolation
+- [x] Day 23: Improved API test cleanup using try/finally, tracked partially created test records, and handled individual deletion errors
+- [ ] Verify cleanup behavior by simulating a deletion failure and checking that remaining records are still attempted
 - [ ] ORM integration
 
 
@@ -57,10 +58,16 @@
 - Used `monkeypatch` to redirect database operations to the test database during tests.
 - Tested FastAPI endpoints with `TestClient`, including successful CRUD operations, validation failures, missing resources, and invalid path parameters.
 - Verified the API test suite: **11 passed**.
+- Improved API test fixture cleanup by tracking each successfully created expense ID immediately.
+- Used `try/finally` so cleanup is attempted even when test assertions fail.
+- Added per-expense `try/except` handling so one deletion error does not stop cleanup attempts for remaining IDs.
+- Updated the POST API test to attempt cleanup of its created expense even if a data assertion fails.
+- Re-ran the API test suite: **11 passed**.
 
 ## Remaining Work
 
-- Improve API test cleanup and isolation, including reliable teardown when a test fails.
+- Test cleanup behavior by simulating a deletion failure and verifying that cleanup continues for remaining records.
+- Improve API test isolation and cleanup reporting where needed.
 - Explore ORM integration after completing direct SQL integration.
 
 ## Day 19: Key Concepts Practised

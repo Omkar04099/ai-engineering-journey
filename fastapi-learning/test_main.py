@@ -16,11 +16,19 @@ def example_expense(monkeypatch):
         "get_connection",
         get_test_connection
     )
-    id_1 = create_expense("Test coffee", 120, "Food")
-    id_2 = create_expense("Test book", 450, "Education")
-    yield id_1, id_2
-    delete_expense(id_1)
-    delete_expense(id_2)
+    created_expenses = []
+    try:
+        id_1 = create_expense("Test coffee", 120, "Food")
+        created_expenses.append(id_1)
+        id_2 = create_expense("Test book", 450, "Education")
+        created_expenses.append(id_2)
+        yield id_1, id_2
+    finally:
+        for expense_id in created_expenses:
+            try:
+                delete_expense(expense_id)
+            except Exception as error:
+                print(f"Deletion failed for expense: {expense_id}, {error}")
 
 
 def test_get_expenses(client,example_expense):
@@ -59,10 +67,15 @@ def test_create_expense(client,example_expense):
    response = client.post("/expenses",json=data)
    assert response.status_code == status.HTTP_201_CREATED
    expense = response.json()
-   assert data["title"] == expense["title"]
-   assert data["amount"] == expense["amount"]
-   assert data["category"].lower() == expense["category"]
-   delete_expense(expense["id"])
+   try:
+    assert data["title"] == expense["title"]
+    assert data["amount"] == expense["amount"]
+    assert data["category"].lower() == expense["category"]
+   finally:
+    try:
+        delete_expense(expense["id"])
+    except Exception as error:
+        print(f"Deletion failed for test expense:{expense['id']},{error}")
 
 def test_create_expense_invalid_amount(client,example_expense):
     data = {

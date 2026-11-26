@@ -2600,3 +2600,80 @@ The tests verify both successful API behavior and expected error responses.
 ## 10. Next Step
 
 Review the test fixture’s cleanup behavior, especially what happens if a test fails before reaching its assertions. Then continue improving the automated test suite.
+
+# Day 23 — Improving API Test Cleanup
+
+## Learning Goals
+
+- Understand when pytest runs fixture teardown.
+- Handle setup failures that occur before a fixture reaches `yield`.
+- Ensure cleanup is attempted even when test assertions fail.
+- Continue cleanup attempts if deleting one test record raises an exception.
+
+## Key Concepts
+
+### 1. Fixture Teardown with `yield`
+
+A pytest fixture can use `yield` to provide a value to a test and separate setup from teardown.
+
+- Code before `yield` performs fixture setup.
+- The value passed to `yield` is provided to the test.
+- Code after `yield` runs during teardown when the test finishes.
+- If setup raises an exception before reaching `yield`, the code after `yield` does not run.
+
+**Key takeaway:** Cleanup placed only after `yield` will not run if setup fails before the fixture reaches `yield`.
+
+### 2. Tracking Partially Created Test Records
+
+The fixture records each expense ID immediately after that expense is created successfully.
+
+This prevents an expense created earlier in setup from being forgotten if a later expense creation fails before `yield`.
+
+**Key takeaway:** Track each resource as soon as its creation succeeds, so cleanup can find resources created during partial setup.
+
+### 3. Using `try/finally`
+
+A `finally` block runs after the protected code finishes, including when an assertion fails.
+
+The POST API test uses `finally` to attempt deletion of the newly created expense after its response data is available.
+
+**Key takeaway:** Use `finally` when cleanup must be attempted regardless of whether the protected code succeeds or fails.
+
+### 4. Handling Cleanup Errors Per Record
+
+The fixture places `try/except` inside the cleanup loop.
+
+If deleting one expense raises an exception, the exception is handled for that ID and the loop can continue attempting to delete the remaining records.
+
+The exception is printed with the affected expense ID and error message.
+
+**Important:** Catching the exception allows the loop to continue, but it does not guarantee that deletion succeeded.
+
+## Implementation Summary
+
+- Added a list to track successfully created fixture expense IDs.
+- Added `try/finally` around fixture setup and teardown.
+- Added per-expense exception handling inside the fixture cleanup loop.
+- Updated the POST test to attempt cleanup even if its data assertions fail.
+
+## Test Run
+
+Ran the API tests using:
+
+```powershell
+py -m pytest -v test_main.py
+```
+
+**Test result:** The command was run, but the test output was not included in these notes. Add the reported pass/fail count here.
+
+## Key Takeaways
+
+- Fixture teardown after `yield` does not run if setup fails before reaching `yield`.
+- Tracking created IDs immediately helps cleanup handle partial setup.
+- `finally` ensures cleanup is attempted even when assertions fail.
+- Handling cleanup errors per record allows later cleanup attempts to continue.
+- An attempted deletion is not the same as a confirmed successful deletion.
+
+## Next Step
+
+Extract the cleanup logic into a helper and test that a simulated deletion failure does not prevent cleanup attempts for the remaining expense IDs.
