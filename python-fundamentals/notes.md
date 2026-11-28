@@ -2677,3 +2677,154 @@ py -m pytest -v test_main.py
 ## Next Step
 
 Extract the cleanup logic into a helper and test that a simulated deletion failure does not prevent cleanup attempts for the remaining expense IDs.
+
+
+
+# Day 24: Testing Cleanup When a Deletion Fails
+
+## Learning Goals
+
+- Understand how `monkeypatch` temporarily replaces a function during a test.
+- Simulate a deletion failure without accessing or modifying the real database.
+- Verify that cleanup continues after one deletion raises an exception.
+
+## Key Concepts
+
+### 1. `monkeypatch`
+
+`monkeypatch` is a pytest fixture that temporarily replaces or modifies an attribute during a test.
+
+```python
+monkeypatch.setattr(object, "attribute_name", replacement)
+```
+
+This replaces the specified attribute with the replacement. Pytest restores the original attribute after the test finishes.
+
+**Important:** Patch the name where the code under test looks it up.
+
+### 2. Fake Functions
+
+A fake function replaces a real operation so a test can control and observe its behavior.
+
+For this exercise, `fake_delete` records each expense ID instead of deleting a database record. It raises an exception for ID `20` to simulate a deletion failure.
+
+### 3. Testing Cleanup Continuation
+
+The test calls:
+
+```python
+cleanup_expenses([10, 20, 30])
+```
+
+The fake deletion function behaves as follows:
+
+1. ID `10` is recorded successfully.
+2. ID `20` is recorded, then the fake function raises an exception.
+3. The helper catches the exception and continues to ID `30`.
+
+The assertion:
+
+```python
+assert attempted_ids == [10, 20, 30]
+```
+
+verifies that every ID was attempted, including the IDs after the simulated failure.
+
+## Implementation Summary
+
+- Extracted the deletion loop into `cleanup_expenses(expense_ids)`.
+- Added per-expense exception handling inside the loop.
+- Used `monkeypatch` to replace the test module’s `delete_expense` name with `fake_delete`.
+- Kept the test independent of the real database by using a fake deletion function.
+- Verified that a failure for one ID does not stop later cleanup attempts.
+
+## Test Run
+
+Command:
+
+```powershell
+py -m pytest -v test_main.py
+```
+
+Result: **12 passed in 5.64 seconds.**
+
+## Key Takeaways
+
+- `monkeypatch` temporarily replaces an attribute and restores it after the test.
+- A fake function lets a test control and observe how code behaves.
+- Patch the name where the code under test looks up the function.
+- Exception handling inside a loop allows later iterations to continue after an individual failure.
+- This test verifies that deletion was attempted; it does not prove that a real database deletion succeeded.
+
+## Next Step
+
+Begin ORM fundamentals and compare ORM-based database access with the direct SQL approach used in the Expense API.
+
+
+
+# Day 25: ORM Fundamentals
+
+## Learning Goals
+
+- Understand what an ORM does and how it differs from direct SQL.
+- Understand the mapping between ORM models and database tables.
+- Distinguish creating a Python object from persisting it in the database.
+- Review the role of transactions, `commit()`, and rollback.
+
+## Key Concepts
+
+### Object-Relational Mapper (ORM)
+
+An ORM provides a way to work with database records through Python classes and objects. It generates SQL for database operations and maps query results back into Python objects.
+
+An ORM does not eliminate SQL. Understanding SQL remains important for choosing appropriate operations and debugging database behavior.
+
+### ORM Model Mapping
+
+| Python | Database |
+|---|---|
+| Class | Table |
+| Object (instance) | Row |
+| Attribute | Column |
+
+An ORM model describes the structure of a database table. An instance represents one record from that table.
+
+### Creating an Object vs. Persisting It
+
+Creating an ORM object creates an object in Python memory. It does not necessarily insert a row into the database.
+
+The ORM must be instructed to persist pending changes. In SQLAlchemy, for example, this commonly involves adding the object to a session and committing the transaction. Exact APIs depend on the ORM.
+
+### Transactions
+
+- `commit()` persists the pending transaction.
+- `rollback()` discards pending changes in the transaction.
+- Uncommitted changes are not guaranteed to be saved.
+
+A commit is not needed merely to read an object’s attributes. It is used to persist pending database changes.
+
+### Direct SQL vs. ORM
+
+With direct SQL, the application writes and executes SQL statements explicitly. With an ORM, the application uses model objects and ORM operations, and the ORM generates the corresponding SQL.
+
+Both approaches ultimately perform database operations using SQL.
+
+Example direct SQL query:
+
+```sql
+SELECT * FROM expenses
+WHERE id = 5;
+```
+
+## Key Takeaways
+
+- An ORM translates between Python objects and database operations.
+- ORM models describe tables; model instances represent rows.
+- Creating or changing a Python object is separate from persisting the change.
+- SQL knowledge is still necessary when working with an ORM.
+- ORM APIs vary, so examples using `add()` and `commit()` are conceptual until a specific ORM is selected.
+
+## Next Step
+
+Begin ORM integration by selecting and configuring the ORM for the Expense API, then create the first ORM model.
+

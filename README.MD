@@ -22,9 +22,9 @@
 - [x] Day 21: Integrated PostgreSQL with the FastAPI Expense API, replaced in-memory storage, and manually verified CRUD endpoints
 - [x] Day 22: Added API-level tests for database-backed Expense endpoints using pytest and FastAPI TestClient
 - [x] Day 23: Improved API test cleanup using try/finally, tracked partially created test records, and handled individual deletion errors
-- [ ] Verify cleanup behavior by simulating a deletion failure and checking that remaining records are still attempted
+- [x] Day 24: Used monkeypatch to simulate a deletion failure and verified that cleanup continues for remaining records
+- [x] Day 25: Learned ORM fundamentals, ORM models, object persistence, transactions, and the difference between ORM operations and direct SQL
 - [ ] ORM integration
-
 
 ## Current Database Progress
 
@@ -57,16 +57,20 @@
 - Used pytest fixtures to create test expenses and clean them up after tests.
 - Used `monkeypatch` to redirect database operations to the test database during tests.
 - Tested FastAPI endpoints with `TestClient`, including successful CRUD operations, validation failures, missing resources, and invalid path parameters.
-- Verified the API test suite: **11 passed**.
+- Verified the API test suite after adding the cleanup failure test: **12 passed**.
 - Improved API test fixture cleanup by tracking each successfully created expense ID immediately.
 - Used `try/finally` so cleanup is attempted even when test assertions fail.
 - Added per-expense `try/except` handling so one deletion error does not stop cleanup attempts for remaining IDs.
 - Updated the POST API test to attempt cleanup of its created expense even if a data assertion fails.
-- Re-ran the API test suite: **11 passed**.
+- Reviewed how an ORM maps Python classes to database tables, objects to rows, and attributes to columns.
+- Compared direct SQL operations with ORM-based database access.
+- Reviewed how ORM sessions manage pending changes and how `commit()` persists a transaction.
+- Clarified that uncommitted changes are not guaranteed to persist and may be rolled back.
+- Practised a PostgreSQL `SELECT` query to retrieve an expense by ID.
+- Confirmed the API test suite after the cleanup failure test: **12 passed**.
 
 ## Remaining Work
 
-- Test cleanup behavior by simulating a deletion failure and verifying that cleanup continues for remaining records.
 - Improve API test isolation and cleanup reporting where needed.
 - Explore ORM integration after completing direct SQL integration.
 
@@ -79,4 +83,4 @@
 - Why tests should not depend on execution order
 - Running and verifying the database test suite with pytest
 
-**Next Session:** Begin automated API testing for the PostgreSQL-backed Expense API using pytest and FastAPI's TestClient. Start with one endpoint and build up the test coverage incrementally.
+**Next Session:** Begin ORM integration. Choose the ORM for the Expense API, install and configure it, and create the first ORM model.
